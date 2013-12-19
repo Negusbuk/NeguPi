@@ -1,4 +1,4 @@
-EXAMPLES=blink statemachine
+EXAMPLES=blink statemachine timelapse
 
 INCPATHS=../../libmcp23s17/src/ ../src
 LIBPATHS=../../libmcp23s17/ ../
@@ -32,6 +32,9 @@ blink: blink.cc
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
 statemachine: statemachine.cc
+	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
+
+timelapse: timelapse.cc
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
 clean:

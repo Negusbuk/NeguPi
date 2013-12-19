@@ -37,14 +37,35 @@ public:
   
   void input1Changed(uint8_t state) {
     std::cout << "void input1Changed(uint8_t state) " << (int)state << std::endl;
+
+    if (state==0) {
+      uint8_t bit = piface_->readBit(6, VPiFace::Output);
+      if (bit==0) {
+	piface_->writeBit(1, 6, VPiFace::Output);
+      } else {
+	piface_->writeBit(0, 6, VPiFace::Output);
+      }
+    }
   }
 
   void input2Changed(uint8_t state) {
     std::cout << "void input2Changed(uint8_t state) " << (int)state << std::endl;
+
+    if (state==0) {
+      piface_->writeBit(1, 5, VPiFace::Output);
+    } else {
+      piface_->writeBit(0, 5, VPiFace::Output);
+    }
   }
 
   void input3Changed(uint8_t state) {
     std::cout << "void input3Changed(uint8_t state) " << (int)state << std::endl;
+
+    if (state==0) {
+      piface_->writeBit(1, 4, VPiFace::Output);
+    } else {
+      piface_->writeBit(0, 4, VPiFace::Output);
+    }
   }
 };
 

@@ -4,21 +4,19 @@
 
 #include "PiFaceStateMachine.h"
 
-void PiFaceStateMachineDummyCallback(uint8_t state)
-{
-  std::cout << (int)state << std::endl;
-}
-
 PiFaceStateMachine::PiFaceStateMachine(VPiFace* piface)
-  :piface_(piface),
-   lastInputState_(0)
+  :piface_(piface)
 {
   lastInputState_ = piface_->readRegister(VPiFace::Input);
-  lastInputState_ = 2;
 
-  for (int i=0;i<8;++i) {
-    functions_[i] = PiFaceStateMachineDummyCallback;
-  }
+  functions_[0] = &PiFaceStateMachine::input0Changed_;
+  functions_[1] = &PiFaceStateMachine::input1Changed_;
+  functions_[2] = &PiFaceStateMachine::input2Changed_;
+  functions_[3] = &PiFaceStateMachine::input3Changed_;
+  functions_[4] = &PiFaceStateMachine::input4Changed_;
+  functions_[5] = &PiFaceStateMachine::input5Changed_;
+  functions_[6] = &PiFaceStateMachine::input6Changed_;
+  functions_[7] = &PiFaceStateMachine::input7Changed_;
 }
 
 PiFaceStateMachine::~PiFaceStateMachine()
@@ -28,31 +26,35 @@ PiFaceStateMachine::~PiFaceStateMachine()
 
 void PiFaceStateMachine::run()
 {
+  uint8_t state, bits, masks[8], data;
+  
+  uint8_t mask = 1;
+  for (uint8_t i=0;i<8;++i) {
+    masks[i] = mask;
+    mask <<= 1;
+  }
+  
   while (1) {
-    uint8_t state = piface_->readRegister(VPiFace::Input);
-
+    
+    state = piface_->readRegister(VPiFace::Input);
+    
     if (state!=lastInputState_) {
-      uint mask = 1;
-      for (int i=0;i<8;++i) {
-        if ( (state&mask) != (lastInputState_&mask) ) {
-          if (state&mask) {
-            functions_[i](1);
-          } else {
-            functions_[i](0);
-          }
+    
+      bits = state ^ lastInputState_;
+      
+      for (uint8_t i=0;i<8;++i) {
+      
+        if (bits & masks[i]) {
+          data = (state & masks[i]) ? 1 : 0;
+	  std::cout << "bit " << (int)i << ": " << (int)data << std::endl;
+	  functions_[i](this, data);
         }
-        mask <<= 1;
+
       }
     }
 
     lastInputState_ = state;
 
-    std::this_thread::sleep_for( std::chrono::milliseconds(250) );
+    std::this_thread::sleep_for( std::chrono::milliseconds(100) );
   }
-}
-
-void PiFaceStateMachine::setCallback(uint8_t bit, std::function<void(uint8_t)>& f)
-{
-  if (bit>=8) return;
-  functions_[bit] = f;
 }

@@ -15,25 +15,38 @@ typedef PiFace PiFace_t;
 
 #include <PiFaceStateMachine.h>
 
-void bit0changed(uint8_t state)
+class StateMachine : public PiFaceStateMachine
 {
-  std::cout << "void bit0changed(uint8_t state) " << (int)state << std::endl;
-}
+public:
+  StateMachine(VPiFace* piface) :
+    PiFaceStateMachine(piface) {
+  }
 
-void bit1changed(uint8_t state)
-{
-  std::cout << "void bit1changed(uint8_t state) " << (int)state << std::endl;
-}
+  void input0Changed(uint8_t state) {
+    std::cout << "void input0Changed(uint8_t state) " << (int)state << std::endl;
 
-void bit2changed(uint8_t state)
-{
-  std::cout << "void bit2changed(uint8_t state) " << (int)state << std::endl;
-}
+    if (state==0) {
+      uint8_t bit = piface_->readBit(7, VPiFace::Output);
+      if (bit==0) {
+	piface_->writeBit(1, 7, VPiFace::Output);
+      } else {
+	piface_->writeBit(0, 7, VPiFace::Output);
+      }
+    }
+  }
+  
+  void input1Changed(uint8_t state) {
+    std::cout << "void input1Changed(uint8_t state) " << (int)state << std::endl;
+  }
 
-void bit3changed(uint8_t state)
-{
-  std::cout << "void bit3changed(uint8_t state) " << (int)state << std::endl;
-}
+  void input2Changed(uint8_t state) {
+    std::cout << "void input2Changed(uint8_t state) " << (int)state << std::endl;
+  }
+
+  void input3Changed(uint8_t state) {
+    std::cout << "void input3Changed(uint8_t state) " << (int)state << std::endl;
+  }
+};
 
 int main(int argc, char * argv[])
 {
@@ -46,19 +59,7 @@ int main(int argc, char * argv[])
 
     pf.init();
 
-    PiFaceStateMachine sm(&pf);
-
-    std::function<void(uint8_t)> f0 = bit0changed;
-    sm.setCallback(0, f0);
-
-    std::function<void(uint8_t)> f1 = bit1changed;
-    sm.setCallback(1, f1);
-
-    std::function<void(uint8_t)> f2 = bit2changed;
-    sm.setCallback(2, f2);
-
-    std::function<void(uint8_t)> f3 = bit3changed;
-    sm.setCallback(3, f3);
+    StateMachine sm(&pf);
 
     sm.run();
 }

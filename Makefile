@@ -10,7 +10,11 @@ LIBRARY = static
 INCPATHS=../libmcp23s17/src/ ./src/
 LIBPATHS=../libmcp23s17/
 
-NODEVICE=1
+MACHINE:= $(shell uname -m)
+NODEVICE=0
+ifneq "$(MACHINE)" "armv6l"
+	NODEVICE=1
+endif
 
 LDFLAGS=
 CPPFLAGS=-std=c++0x -c -Wall

@@ -3,7 +3,6 @@
 #include <unistd.h>
 
 #include <iostream>
-#include <functional>
 
 #ifdef NODEVICE
 #include <PiFaceFake.h>

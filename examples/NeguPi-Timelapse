@@ -1,0 +1,20 @@
+#! /bin/sh
+# /etc/init.d/NeguPi-Timelapse
+
+touch /var/lock/raspi-rss
+
+case "$1" in
+start)
+echo "Starting NeguPi Timelapse ... "
+/home/pi/bin/timelapse > /dev/null &
+;;
+stop)
+echo "Killing NeguPi Timelapse ..."
+killall timelapse
+;;
+*)
+echo "Usage: /etc/init.d/NeguPi-Timelapse {start|stop}"
+exit 1
+;;
+esac
+exit 0

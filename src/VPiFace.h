@@ -5,7 +5,7 @@
 
 class VPiFace
 {
- public:
+public:
 
   enum PiFaceGPIO {
     Output = 0x12,
@@ -22,7 +22,7 @@ class VPiFace
   virtual uint8_t readBit(uint8_t bit, uint8_t reg) = 0;
   virtual void writeBit(uint8_t data, uint8_t bit, uint8_t reg) = 0;
   
- protected:
+protected:
 
   uint8_t hw_addr_;
 };

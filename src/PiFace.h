@@ -7,7 +7,7 @@
 
 class PiFace : public VPiFace
 {
- public:
+public:
 
   explicit PiFace(uint8_t hw_addr);
   virtual ~PiFace();
@@ -19,7 +19,7 @@ class PiFace : public VPiFace
   uint8_t readBit(uint8_t bit, uint8_t reg);
   void writeBit(uint8_t data, uint8_t bit, uint8_t reg);
   
- protected:
+protected:
 
   static uint8_t usecount_;
   static int mcp23s17_fd_;

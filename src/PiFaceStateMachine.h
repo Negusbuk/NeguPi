@@ -7,7 +7,7 @@
 
 class PiFaceStateMachine
 {
- public:
+public:
 
   explicit PiFaceStateMachine(VPiFace* piface);
   virtual ~PiFaceStateMachine();
@@ -23,8 +23,8 @@ class PiFaceStateMachine
   virtual void input6Changed(uint8_t state) { }
   virtual void input7Changed(uint8_t state) { }
   
- protected:
- 
+protected:
+
   VPiFace* piface_;
 
   uint8_t lastInputState_;

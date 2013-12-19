@@ -28,9 +28,9 @@ public:
     if (state==0) {
       uint8_t bit = piface_->readBit(7, VPiFace::Output);
       if (bit==0) {
-	piface_->writeBit(1, 7, VPiFace::Output);
+        piface_->writeBit(1, 7, VPiFace::Output);
       } else {
-	piface_->writeBit(0, 7, VPiFace::Output);
+        piface_->writeBit(0, 7, VPiFace::Output);
       }
     }
   }
@@ -50,16 +50,16 @@ public:
 
 int main(int argc, char * argv[])
 {
-    int hw_addr = 0;
-    if (argc > 1) {
-        hw_addr = atoi(argv[1]);
-    }
+  int hw_addr = 0;
+  if (argc > 1) {
+    hw_addr = atoi(argv[1]);
+  }
 
-    PiFace_t pf(hw_addr);
+  PiFace_t pf(hw_addr);
 
-    pf.init();
+  pf.init();
 
-    StateMachine sm(&pf);
+  StateMachine sm(&pf);
 
-    sm.run();
+  sm.run();
 }

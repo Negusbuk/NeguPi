@@ -7,7 +7,7 @@
 
 class PiFaceFake : public VPiFace
 {
- public:
+public:
 
   explicit PiFaceFake(uint8_t hw_addr);
   virtual ~PiFaceFake();
@@ -19,7 +19,7 @@ class PiFaceFake : public VPiFace
   uint8_t readBit(uint8_t bit, uint8_t reg);
   void writeBit(uint8_t data, uint8_t bit, uint8_t reg);
   
- protected:
+protected:
 
   static uint8_t inputState_;
   static uint8_t outputState_;

@@ -5,7 +5,7 @@
 #include "PiFaceStateMachine.h"
 
 PiFaceStateMachine::PiFaceStateMachine(VPiFace* piface)
-  :piface_(piface)
+:piface_(piface)
 {
   lastInputState_ = piface_->readRegister(VPiFace::Input);
 
@@ -39,15 +39,15 @@ void PiFaceStateMachine::run()
     state = piface_->readRegister(VPiFace::Input);
     
     if (state!=lastInputState_) {
-    
+
       bits = state ^ lastInputState_;
       
       for (uint8_t i=0;i<8;++i) {
-      
+
         if (bits & masks[i]) {
           data = (state & masks[i]) ? 1 : 0;
-	  std::cout << "bit " << (int)i << ": " << (int)data << std::endl;
-	  functions_[i](this, data);
+          std::cout << "bit " << (int)i << ": " << (int)data << std::endl;
+          functions_[i](this, data);
         }
 
       }

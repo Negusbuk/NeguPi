@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <iostream>
 #include <vector>
@@ -32,7 +33,7 @@ public:
     previewArgs_[args.size()] = 0;
 
     for (uint8_t i=0;i<args.size();++i) {
-      previewArgs_[i] = ::strdup(args.at(i).c_str());
+      previewArgs_[i] = strdup(args.at(i).c_str());
     }
   }
 

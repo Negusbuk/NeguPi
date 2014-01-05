@@ -1,20 +1,59 @@
-#! /bin/sh
-# /etc/init.d/NeguPi-Timelapse
+#!/bin/sh
 
-touch /var/lock/raspi-rss
+### BEGIN INIT INFO
+# Provides:		NeguPi
+# Required-Start:	
+# Required-Stop:	
+# Should-Start:		
+# Should-Stop:
+# Default-Start:	2 3 4 5
+# Default-Stop:		0 1 6
+# Short-Description:	Advanced IEEE 802.11 management daemon
+# Description:		Userspace IEEE 802.11 AP and IEEE 802.1X/WPA/WPA2/EAP
+#			Authenticator
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/home/pi/bin
+DAEMON_SBIN=/home/pi/bin/blink
+DAEMON_DEFS=
+DAEMON_CONF=
+NAME=blink
+DESC="NeguPi "
+
+[ -x "$DAEMON_SBIN" ] || exit 0
+
+. /lib/lsb/init-functions
 
 case "$1" in
-start)
-echo "Starting NeguPi Timelapse ... "
-/home/pi/bin/timelapse > /dev/null &
-;;
-stop)
-echo "Killing NeguPi Timelapse ..."
-killall timelapse
-;;
-*)
-echo "Usage: /etc/init.d/NeguPi-Timelapse {start|stop}"
-exit 1
-;;
+  start)
+	log_daemon_msg "Starting $DESC" "$NAME"
+       	start-stop-daemon --start --oknodo --quiet --user pi --exec "$DAEMON_SBIN" >/dev/null
+	log_end_msg "$?"
+	;;
+  stop)
+	log_daemon_msg "Stopping $DESC" "$NAME"
+	start-stop-daemon --stop --oknodo --quiet --exec "$DAEMON_SBIN"
+	log_end_msg "$?"
+	;;
+  reload)
+  	log_daemon_msg "Reloading $DESC" "$NAME"
+	start-stop-daemon --stop --signal HUP --exec "$DAEMON_SBIN"
+	log_end_msg "$?"
+	;;
+  restart|force-reload)
+  	$0 stop
+	sleep 8
+	$0 start
+	;;
+  status)
+	status_of_proc "$DAEMON_SBIN" "$NAME"
+	exit $?
+	;;
+  *)
+	N=/etc/init.d/NeguPi
+	echo "Usage: $N {start|stop|restart|force-reload|reload|status}" >&2
+	exit 1
+	;;
 esac
+
 exit 0

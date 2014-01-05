@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <syslog.h>
 
 #ifdef NODEVICE
 #include <PiFaceFake.h>
@@ -10,8 +14,63 @@ typedef PiFaceFake PiFace_t;
 typedef PiFace PiFace_t;
 #endif
 
+static void skeleton_daemon()
+{
+    pid_t pid;
+
+    /* Fork off the parent process */
+    pid = fork();
+
+    /* An error occurred */
+    if (pid < 0)
+        exit(EXIT_FAILURE);
+
+    /* Success: Let the parent terminate */
+    if (pid > 0)
+        exit(EXIT_SUCCESS);
+
+    /* On success: The child process becomes session leader */
+    if (setsid() < 0)
+        exit(EXIT_FAILURE);
+
+    /* Catch, ignore and handle signals */
+    //TODO: Implement a working signal handler */
+    signal(SIGCHLD, SIG_IGN);
+    signal(SIGHUP, SIG_IGN);
+
+    /* Fork off for the second time*/
+    pid = fork();
+
+    /* An error occurred */
+    if (pid < 0)
+        exit(EXIT_FAILURE);
+
+    /* Success: Let the parent terminate */
+    if (pid > 0)
+        exit(EXIT_SUCCESS);
+
+    /* Set new file permissions */
+    umask(0);
+
+    /* Change the working directory to the root directory */
+    /* or another appropriated directory */
+    chdir("/");
+
+    /* Close all open file descriptors */
+    int x;
+    for (x = sysconf(_SC_OPEN_MAX); x>0; x--)
+    {
+        close (x);
+    }
+
+    /* Open the log file */
+    openlog ("firstdaemon", LOG_PID, LOG_DAEMON);
+}
+
 int main(int argc, char * argv[])
 {
+  skeleton_daemon();
+
   int hw_addr = 0;
   if (argc > 1) {
     hw_addr = atoi(argv[1]);
@@ -24,7 +83,7 @@ int main(int argc, char * argv[])
   while (1){
     pf.writeBit(1, 7, VPiFace::Output);
     uint8_t bit = pf.readBit(7, VPiFace::Output);
-    printf("Bit 7 is %d\n", bit);
+    syslog(LOG_NOTICE, "Bit 7 is %d\n", bit);
     usleep(500000);
     pf.writeBit(0, 7, VPiFace::Output);
     bit = pf.readBit(7, VPiFace::Output);

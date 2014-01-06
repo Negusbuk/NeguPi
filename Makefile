@@ -3,7 +3,9 @@ PROJECT = NeguPi
 SOURCES = src/VPiFace.cc \
 		  src/PiFace.cc \
 		  src/PiFaceFake.cc \
-		  src/PiFaceStateMachine.cc
+                  src/PiFaceDaemon.cc \
+		  src/PiFaceStateMachine.cc \
+                  src/PiFaceLogger.cc
 
 LIBRARY = static
 

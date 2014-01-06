@@ -1,8 +1,7 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-#include <iostream>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <syslog.h>
 
 #ifdef NODEVICE
 #include <PiFaceFake.h>
@@ -12,6 +11,8 @@ typedef PiFaceFake PiFace_t;
 typedef PiFace PiFace_t;
 #endif
 
+#include <PiFaceDaemon.h>
+#include <PiFaceLogger.h>
 #include <PiFaceStateMachine.h>
 
 class StateMachine : public PiFaceStateMachine
@@ -22,7 +23,7 @@ public:
   }
 
   void input0Changed(uint8_t state) {
-    std::cout << "void input0Changed(uint8_t state) " << (int)state << std::endl;
+    PiFaceLog() << "void input0Changed(uint8_t state) " << (int)state;
 
     if (state==0) {
       uint8_t bit = piface_->readBit(7, VPiFace::Output);
@@ -35,7 +36,7 @@ public:
   }
   
   void input1Changed(uint8_t state) {
-    std::cout << "void input1Changed(uint8_t state) " << (int)state << std::endl;
+    PiFaceLog() << "void input1Changed(uint8_t state) " << (int)state;
 
     if (state==0) {
       uint8_t bit = piface_->readBit(6, VPiFace::Output);
@@ -48,7 +49,7 @@ public:
   }
 
   void input2Changed(uint8_t state) {
-    std::cout << "void input2Changed(uint8_t state) " << (int)state << std::endl;
+    PiFaceLog() << "void input2Changed(uint8_t state) " << (int)state;
 
     if (state==0) {
       piface_->writeBit(1, 5, VPiFace::Output);
@@ -58,7 +59,7 @@ public:
   }
 
   void input3Changed(uint8_t state) {
-    std::cout << "void input3Changed(uint8_t state) " << (int)state << std::endl;
+    PiFaceLog() << "void input3Changed(uint8_t state) " << (int)state;
 
     if (state==0) {
       piface_->writeBit(1, 4, VPiFace::Output);
@@ -70,6 +71,9 @@ public:
 
 int main(int argc, char * argv[])
 {
+  Daemonize("statemachine");
+  PiFaceLogger::instance(true);
+  
   int hw_addr = 0;
   if (argc > 1) {
     hw_addr = atoi(argv[1]);

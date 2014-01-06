@@ -22,10 +22,12 @@
 #include <chrono>
 #include <thread>
 
+#include "PiFaceLogger.h"
 #include "PiFaceStateMachine.h"
 
 PiFaceStateMachine::PiFaceStateMachine(VPiFace* piface)
-:piface_(piface)
+:piface_(piface),
+ timeout_(100)
 {
   lastInputState_ = piface_->readRegister(VPiFace::Input);
 
@@ -54,6 +56,8 @@ void PiFaceStateMachine::run()
     mask <<= 1;
   }
   
+  auto lastTP = std::chrono::high_resolution_clock::now();
+
   while (1) {
     
     state = piface_->readRegister(VPiFace::Input);
@@ -66,7 +70,7 @@ void PiFaceStateMachine::run()
 
         if (bits & masks[i]) {
           data = (state & masks[i]) ? 1 : 0;
-          std::cout << "bit " << (int)i << ": " << (int)data << std::endl;
+          // PiFaceLog() << "bit " << (int)i << ": " << (int)data;
           functions_[i](this, data);
         }
 
@@ -74,7 +78,16 @@ void PiFaceStateMachine::run()
     }
 
     lastInputState_ = state;
+    
+    std::this_thread::sleep_for( std::chrono::milliseconds(timeout_) );
 
-    std::this_thread::sleep_for( std::chrono::milliseconds(100) );
+    auto TP = std::chrono::high_resolution_clock::now();
+
+    auto elapsed = TP - lastTP;
+    int millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+    if (millis>1000) {
+      this->heartBeat(millis);
+      lastTP = TP;
+    }
   }
 }

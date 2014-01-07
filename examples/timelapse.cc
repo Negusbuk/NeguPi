@@ -51,7 +51,7 @@ public:
   TimeLapse(VPiFace* piface) :
     PiFaceStateMachine(piface),
     inTimeLapse_(false),
-    timeout_(5*1000),
+    timeout_(2*1000),
     delay_(0),
     imageLoopCount_(1),
     imageCount_(1) {
@@ -60,9 +60,9 @@ public:
 
     std::vector<std::string> args;
     args.push_back("raspistill");
-    args.push_back("--width"); args.push_back("400");
-    args.push_back("--height"); args.push_back("300");
-    args.push_back("--timeout"); args.push_back("100");
+    args.push_back("--width"); args.push_back("960");
+    args.push_back("--height"); args.push_back("540");
+    args.push_back("--timeout"); args.push_back("1");
     args.push_back("--output"); args.push_back("/home/pi/www/preview.jpg");
 
     previewArgs_ = new char *[args.size() + 1];
@@ -76,7 +76,7 @@ public:
     args.push_back("raspistill");
     args.push_back("--width"); args.push_back("960");
     args.push_back("--height"); args.push_back("540");
-    args.push_back("--timeout"); args.push_back("100");
+    args.push_back("--timeout"); args.push_back("1");
     args.push_back("--output"); args.push_back(outputDir_ + "/image_XXX_YYYYYYYY.jpg ");
 
     /*
@@ -200,8 +200,8 @@ protected:
 
 int main(int argc, char * argv[])
 {
-  //Daemonize("timelapse");
-  //PiFaceLogger::instance(true);
+  Daemonize("timelapse");
+  PiFaceLogger::instance(true);
   
   int hw_addr = 0;
   if (argc > 1) {

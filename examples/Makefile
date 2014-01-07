@@ -39,3 +39,7 @@ timelapse: timelapse.cc
 
 clean:
 	rm -f $(EXAMPLES)
+
+install:
+	cp $(EXAMPLES) /home/pi/bin
+

@@ -27,7 +27,7 @@
 
 PiFaceStateMachine::PiFaceStateMachine(VPiFace* piface)
 :piface_(piface),
- timeout_(100)
+ timeout_(250)
 {
   lastInputState_ = piface_->readRegister(VPiFace::Input);
 

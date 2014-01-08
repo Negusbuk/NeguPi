@@ -1,7 +1,7 @@
 EXAMPLES=blink statemachine timelapse
 
 INCPATHS=../../libmcp23s17/src/ ../src
-LIBPATHS=../../libmcp23s17/ ../
+LIBPATHS=../../libmcp23s17/ ../src
 
 MACHINE:= $(shell uname -m)
 NODEVICE=0
@@ -9,7 +9,7 @@ ifneq "$(MACHINE)" "armv6l"
 	NODEVICE=1
 endif
 
-LDFLAGS=-L../ -lNeguPi
+LDFLAGS=-L../src -lNeguPi
 CPPFLAGS=-std=c++0x -Wall
 CPP=g++
 
@@ -36,10 +36,14 @@ statemachine: statemachine.cc
 
 timelapse: timelapse.cc
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
+	
+distclean: clean
+	rm -fr ../bin
 
 clean:
 	rm -f $(EXAMPLES)
 
 install:
-	cp $(EXAMPLES) /home/pi/bin
+	mkdir ../bin
+	cp $(EXAMPLES) ../bin
 

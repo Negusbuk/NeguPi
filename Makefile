@@ -1,11 +1,14 @@
 PROJECT = NeguPi
 
-SOURCES = src/VPiFace.cc \
+SOURCES = src/VMCP23S17.cc \
+		  src/MCP23S17Fake.cc \
+		  src/MCP23S17.cc \
+		  src/VPiFace.cc \
 		  src/PiFace.cc \
 		  src/PiFaceFake.cc \
-                  src/PiFaceDaemon.cc \
+          src/PiFaceDaemon.cc \
 		  src/PiFaceStateMachine.cc \
-                  src/PiFaceLogger.cc
+          src/PiFaceLogger.cc
 
 LIBRARY = static
 

@@ -1,13 +1,14 @@
 
-SOURCES = VMCP23S17.cc \
+SOURCES = NeguPiLogger.cc \
+          NeguPiDaemon.cc \
+          VMCP23S17.cc \
 		  MCP23S17Fake.cc \
 		  MCP23S17.cc \
 		  VPiFace.cc \
-		  PiFace.cc \
 		  PiFaceFake.cc \
-          PiFaceDaemon.cc \
-		  PiFaceStateMachine.cc \
-          PiFaceLogger.cc
+		  PiFaceOrg.cc \
+		  PiFace.cc \
+		  PiFaceStateMachine.cc
 
 MACHINE:= $(shell uname -m)
 NODEVICE=0
@@ -23,8 +24,10 @@ ifeq "$(NODEVICE)" "1"
 CPPFLAGS+= -DNODEVICE
 endif
 
-INCPATHS=../../libmcp23s17/src/ .
-LIBPATHS=../../libmcp23s17/
+#INCPATHS=../../libmcp23s17/src/ .
+#LIBPATHS=../../libmcp23s17/
+INCPATHS=.
+LIBPATHS=
 
 # ------------ MAGIC BEGINS HERE -------------
 

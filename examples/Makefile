@@ -1,7 +1,7 @@
 EXAMPLES=blink statemachine timelapse
 
-INCPATHS=../../libmcp23s17/src/ ../src
-LIBPATHS=../../libmcp23s17/ ../src
+INCPATHS=../src
+LIBPATHS=../src
 
 MACHINE:= $(shell uname -m)
 NODEVICE=0
@@ -15,8 +15,6 @@ CPP=g++
 
 ifeq "$(NODEVICE)" "1"
 CPPFLAGS+= -DNODEVICE
-else
-LDFLAGS+= -L../../libmcp23s17/ -lmcp23s17
 endif
 
 # ------------ MAGIC BEGINS HERE -------------

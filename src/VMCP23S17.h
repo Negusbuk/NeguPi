@@ -30,8 +30,8 @@ namespace NeguPi {
   public:
 
     enum COMMAND {
-      WRITE = 0x0,
-      READ  = 0x1
+      WRITE_CMD = 0x0,
+      READ_CMD  = 0x1
     };
 
     enum REGISTER {

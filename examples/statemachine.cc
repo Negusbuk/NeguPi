@@ -86,8 +86,8 @@ public:
 
 int main(int argc, char * argv[])
 {
-  Daemonize("statemachine");
-  Logger::instance(true);
+  //Daemonize("statemachine");
+  //Logger::instance(true);
   
   int hw_addr = 0;
   if (argc > 1) {

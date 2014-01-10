@@ -35,8 +35,8 @@ using namespace NeguPi;
 
 int main(int argc, char * argv[])
 {
-  Daemonize("blink");
-  Logger::instance(true);
+  //Daemonize("blink");
+  //Logger::instance(true);
 
   int hw_addr = 0;
   if (argc > 1) {

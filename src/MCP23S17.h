@@ -54,14 +54,11 @@ namespace NeguPi {
 
     int fd_;
 
-    const uint8_t spi_mode_ = 0;
-    const uint8_t spi_bpw_ = 8; // bits per word
-    const uint32_t spi_speed_ = 10000000; // 10MHz
-    const uint16_t spi_delay_ = 0;
-    const char * spidev_[2][2] = {
-                                  {"/dev/spidev0.0", "/dev/spidev0.1"},
-                                  {"/dev/spidev1.0", "/dev/spidev1.1"},
-    };
+    static const uint8_t spi_mode_;
+    static const uint8_t spi_bpw_;
+    static const uint32_t spi_speed_;
+    static const uint16_t spi_delay_;
+    static const char* spidev_[2][2];
 
     static uint8_t useCount_;
   };

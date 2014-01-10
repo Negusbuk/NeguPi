@@ -26,10 +26,12 @@
 #include <sys/stat.h>
 #include <syslog.h>
 
-#include "PiFaceDaemon.h"
+#include "NeguPiDaemon.h"
 
-void Daemonize(const char* name)
-{
+namespace NeguPi {
+
+  void Daemonize(const char* name)
+  {
     pid_t pid;
 
     /* Fork off the parent process */
@@ -37,15 +39,15 @@ void Daemonize(const char* name)
 
     /* An error occurred */
     if (pid < 0)
-        exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE);
 
     /* Success: Let the parent terminate */
     if (pid > 0)
-        exit(EXIT_SUCCESS);
+      exit(EXIT_SUCCESS);
 
     /* On success: The child process becomes session leader */
     if (setsid() < 0)
-        exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE);
 
     /* Catch, ignore and handle signals */
     //TODO: Implement a working signal handler */
@@ -57,11 +59,11 @@ void Daemonize(const char* name)
 
     /* An error occurred */
     if (pid < 0)
-        exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE);
 
     /* Success: Let the parent terminate */
     if (pid > 0)
-        exit(EXIT_SUCCESS);
+      exit(EXIT_SUCCESS);
 
     /* Set new file permissions */
     umask(0);
@@ -73,10 +75,11 @@ void Daemonize(const char* name)
     /* Close all open file descriptors */
     int x;
     for (x = sysconf(_SC_OPEN_MAX); x>0; x--) {
-        close (x);
+      close (x);
     }
 
     /* Open the log file */
     openlog(name, LOG_PID, LOG_DAEMON);
-}
+  }
 
+};

@@ -18,9 +18,48 @@
  **
  ****************************************************************************/
 
-#ifndef PIFACEDAEMON_H
-#define PIFACEDAEMON_H
+#include <syslog.h>
 
-void Daemonize(const char* name);
+#include <iostream>
 
-#endif
+#include "NeguPiLogger.h"
+
+namespace NeguPi {
+
+  Log::Log()
+  {
+
+  }
+
+  Log::~Log()
+  {
+    Logger::instance()->write(stream_.str());
+  }
+
+  Logger* Logger::instance_ = NULL;
+
+  Logger::Logger(bool daemonized)
+  :daemonized_(daemonized)
+  {
+
+  }
+
+  Logger* Logger::instance(bool daemonized)
+  {
+    if (instance_==NULL) {
+      instance_ = new Logger(daemonized);
+    }
+
+    return instance_;
+  }
+  
+  void Logger::write(const std::string& text)
+  {
+    if (!daemonized_) {
+      std::cout << text << std::endl;
+    } else {
+      syslog(LOG_NOTICE, "%s", text.c_str());
+    }
+  }
+
+};

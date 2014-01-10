@@ -26,39 +26,36 @@
 #include <sys/stat.h>
 #include <syslog.h>
 
-#ifdef NODEVICE
-#include <PiFaceFake.h>
-typedef PiFaceFake PiFace_t;
-#else
 #include <PiFace.h>
-typedef PiFace PiFace_t;
-#endif
 
-#include <PiFaceDaemon.h>
-#include <PiFaceLogger.h>
+#include <NeguPiDaemon.h>
+#include <NeguPiLogger.h>
+
+using namespace NeguPi;
 
 int main(int argc, char * argv[])
 {
   Daemonize("blink");
-  PiFaceLogger::instance(true);
+  Logger::instance(true);
 
   int hw_addr = 0;
   if (argc > 1) {
     hw_addr = atoi(argv[1]);
   }
 
-  PiFace_t pf(hw_addr);
+  PiFace pf(hw_addr);
 
   pf.init();
 
   while (1){
-    pf.writeBit(1, 7, VPiFace::Output);
-    uint8_t bit = pf.readBit(7, VPiFace::Output);
-    PiFaceLog() << "Bit 7 is " << (int)bit;
+    pf.writeBit(7, PiFace::Output, 1);
+    uint8_t bit = pf.readBit(7, PiFace::Output);
+    Log() << "Bit 7 is " << (int)bit;
     usleep(500000);
-    pf.writeBit(0, 7, VPiFace::Output);
-    bit = pf.readBit(7, VPiFace::Output);
-    PiFaceLog() << "Bit 7 is " << (int)bit;
+    pf.writeBit(7, PiFace::Output, 0
+                );
+    bit = pf.readBit(7, PiFace::Output);
+    Log() << "Bit 7 is " << (int)bit;
     usleep(500000);
   }
 }

@@ -32,23 +32,19 @@
 #include <thread>
 #include <chrono>
 
-#ifdef NODEVICE
-#include <PiFaceFake.h>
-typedef PiFaceFake PiFace_t;
-#else
-#include <PiFace.h>
-typedef PiFace PiFace_t;
-#endif
+#include <NeguPiDaemon.h>
+#include <NeguPiLogger.h>
 
-#include <PiFaceDaemon.h>
-#include <PiFaceLogger.h>
+#include <PiFace.h>
 #include <PiFaceStateMachine.h>
+
+using namespace NeguPi;
 
 class TimeLapse : public PiFaceStateMachine
 {
 public:
 
-  TimeLapse(VPiFace* piface) :
+  TimeLapse(PiFace* piface) :
     PiFaceStateMachine(piface),
     inTimeLapse_(false),
     timeout_(2*1000),
@@ -97,7 +93,7 @@ public:
   void input0Changed(uint8_t state) {
 
     if (state==0) {
-      PiFaceLog() << "take new preview picture";
+      Log() << "take new preview picture";
 
       pid_t child_pid = fork();
       if (child_pid == 0) {
@@ -109,14 +105,6 @@ public:
     }
   }
   
-  void input1Changed(uint8_t state) {
-    PiFaceLog() << "void input1Changed(uint8_t state) " << (int)state;
-  }
-
-  void input2Changed(uint8_t state) {
-    PiFaceLog() << "void input2Changed(uint8_t state) " << (int)state;
-  }
-
   void input3Changed(uint8_t state) {
 
     if (state==0) {
@@ -124,14 +112,12 @@ public:
       imageCount_ = 1;
       inTimeLapse_ = true;
       delay_ = 0;
-      PiFaceLog() << "inTimeLapse_ = true";
-      PiFaceLog() << "starting image sequence " << imageLoopCount_;
+      Log() << "inTimeLapse_ = true";
+      Log() << "starting image sequence " << imageLoopCount_;
     } else {
       inTimeLapse_ = false;
-      PiFaceLog() << "inTimeLapse_ = false";
+      Log() << "inTimeLapse_ = false";
     }
-    
-    PiFaceLog() << "void input3Changed(uint8_t state) " << (int)state;
   }
 
   void heartBeat(int milliseconds) {
@@ -139,7 +125,7 @@ public:
     if (inTimeLapse_) {
       delay_ += milliseconds;
       if (delay_>timeout_) {
-        PiFaceLog() << "beat " << delay_;
+        // Log() << "beat " << delay_;
 
         sprintf(imageArgs_[nImageArgs_-1],
                 "%s/image_%03d_%06d.jpg",
@@ -164,7 +150,7 @@ public:
 
     DIR* dp = opendir(outputDir_.c_str());
     if (dp == NULL) {
-      PiFaceLog() << "Error(" << errno << ") opening " << outputDir_;
+      Log() << "Error(" << errno << ") opening " << outputDir_;
       exit(0);
     }
 
@@ -201,14 +187,14 @@ protected:
 int main(int argc, char * argv[])
 {
   Daemonize("timelapse");
-  PiFaceLogger::instance(true);
+  Logger::instance(true);
   
   int hw_addr = 0;
   if (argc > 1) {
     hw_addr = atoi(argv[1]);
   }
 
-  PiFace_t pf(hw_addr);
+  PiFace pf(hw_addr);
 
   pf.init();
 

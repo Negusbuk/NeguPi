@@ -36,6 +36,15 @@
 
 namespace NeguPi {
 
+  const uint8_t MCP23S17::spi_mode_ = 0;
+  const uint8_t MCP23S17::spi_bpw_ = 8; // bits per word
+  const uint32_t MCP23S17::spi_speed_ = 10000000; // 10MHz
+  const uint16_t MCP23S17::spi_delay_ = 0;
+  const char* MCP23S17::spidev_[2][2] = {
+    { "/dev/spidev0.0", "/dev/spidev0.1" },
+    { "/dev/spidev1.0", "/dev/spidev1.1" },
+  };
+
   uint8_t MCP23S17::useCount_ = 0;
 
   MCP23S17::MCP23S17(uint8_t bus, uint8_t cs)
@@ -49,9 +58,11 @@ namespace NeguPi {
   {
 #ifndef NODEVICE
 
-    if ((fd = open(spidev_[bus][chip_select], O_RDWR)) < 0) {
+    int fd;
+
+    if ((fd = ::open(spidev_[bus_][cs_], O_RDWR)) < 0) {
       Log() << "MCP23S17::open: ERROR Could not open SPI device "
-          << spidev[bus][chip_select];
+          << spidev_[bus_][cs_];
       return false;
     }
 
@@ -86,7 +97,7 @@ namespace NeguPi {
   bool MCP23S17::close()
   {
 #ifndef NODEVICE
-    close(fd_);
+    ::close(fd_);
     useCount_--;
 #endif
     return true;
@@ -104,9 +115,9 @@ namespace NeguPi {
     spi.tx_buf = (unsigned long) tx_buf;
     spi.rx_buf = (unsigned long) rx_buf;
     spi.len = sizeof tx_buf;
-    spi.delay_usecs = spi_delay;
-    spi.speed_hz = spi_speed;
-    spi.bits_per_word = spi_bpw;
+    spi.delay_usecs = spi_delay_;
+    spi.speed_hz = spi_speed_;
+    spi.bits_per_word = spi_bpw_;
 
     // do the SPI transaction
     if ((ioctl(fd_, SPI_IOC_MESSAGE(1), &spi) < 0)) {
@@ -134,9 +145,9 @@ namespace NeguPi {
     spi.tx_buf = (unsigned long) tx_buf;
     spi.rx_buf = (unsigned long) rx_buf;
     spi.len = sizeof tx_buf;
-    spi.delay_usecs = spi_delay;
-    spi.speed_hz = spi_speed;
-    spi.bits_per_word = spi_bpw;
+    spi.delay_usecs = spi_delay_;
+    spi.speed_hz = spi_speed_;
+    spi.bits_per_word = spi_bpw_;
 
     // do the SPI transaction
     if ((ioctl(fd_, SPI_IOC_MESSAGE(1), &spi) < 0)) {

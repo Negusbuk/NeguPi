@@ -31,146 +31,161 @@
 #include <linux/spi/spidev.h>
 #endif
 
-#include "PiFaceLogger.h"
+#include "NeguPiLogger.h"
 #include "MCP23S17.h"
 
-MCP23S17::MCP23S17(uint8_t bus, uint8_t cs)
-:VMCP23S17(bus, cs),
- fd_(-1)
-{
+namespace NeguPi {
 
-}
+  uint8_t MCP23S17::useCount_ = 0;
 
-bool MCP23S17::open()
-{
+  MCP23S17::MCP23S17(uint8_t bus, uint8_t cs)
+  :VMCP23S17(bus, cs),
+   fd_(-1)
+  {
+
+  }
+
+  bool MCP23S17::open()
+  {
 #ifndef NODEVICE
 
-  if ((fd = open(spidev_[bus][chip_select], O_RDWR)) < 0) {
-    PiFaceLog() << "MCP23S17::open: ERROR Could not open SPI device "
-        << spidev[bus][chip_select];
-    return false;
-  }
+    if ((fd = open(spidev_[bus][chip_select], O_RDWR)) < 0) {
+      Log() << "MCP23S17::open: ERROR Could not open SPI device "
+          << spidev[bus][chip_select];
+      return false;
+    }
 
-  // initialise
-  if (ioctl(fd, SPI_IOC_WR_MODE, &spi_mode_) < 0) {
-    PiFaceLog() << "MCP23S17::open: ERROR Could not set SPI mode " << spi_mode_;
-    return false;
-  }
-  if (ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &spi_bpw_) < 0) {
-    PiFaceLog() << "MCP23S17::open: ERROR Could not set SPI bits per word " << spi_bpw_;
-    return false;
-  }
-  if (ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &spi_speed_) < 0) {
-    PiFaceLog() << "MCP23S17::open: ERROR Could not set SPI speed " << spi_speed_;
-    return false;
-  }
+    if (useCount_==0) {
 
-  fd_ = fd;
+      // initialise
+      if (ioctl(fd, SPI_IOC_WR_MODE, &spi_mode_) < 0) {
+        Log() << "MCP23S17::open: ERROR Could not set SPI mode " << spi_mode_;
+        return false;
+      }
+      if (ioctl(fd, SPI_IOC_WR_BITS_PER_WORD, &spi_bpw_) < 0) {
+        Log() << "MCP23S17::open: ERROR Could not set SPI bits per word " << spi_bpw_;
+        return false;
+      }
+      if (ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &spi_speed_) < 0) {
+        Log() << "MCP23S17::open: ERROR Could not set SPI speed " << spi_speed_;
+        return false;
+      }
 
-  return true;
+      useCount_++;
+    }
+
+    fd_ = fd;
+
+    return true;
 
 #else
-  return true;
+    return true;
 #endif
-}
-
-bool MCP23S17::close()
-{
-  return true;
-}
-
-uint8_t MCP23S17::readRegister(MCP23S17_REG reg, uint8_t hw_addr)
-{
-#ifndef NODEVICE
-
-  uint8_t control_byte = getSPIControlByte(READ_CMD, hw_addr);
-  uint8_t tx_buf[3] = {control_byte, reg, 0};
-  uint8_t rx_buf[sizeof tx_buf];
-
-  struct spi_ioc_transfer spi;
-  spi.tx_buf = (unsigned long) tx_buf;
-  spi.rx_buf = (unsigned long) rx_buf;
-  spi.len = sizeof tx_buf;
-  spi.delay_usecs = spi_delay;
-  spi.speed_hz = spi_speed;
-  spi.bits_per_word = spi_bpw;
-
-  // do the SPI transaction
-  if ((ioctl(fd_, SPI_IOC_MESSAGE(1), &spi) < 0)) {
-    PiFaceLog() << "MCP23S17::readRegister: There was a error during the SPI transaction";
-    return -1;
   }
 
-  // return the data
-  return rx_buf[2];
+  bool MCP23S17::close()
+  {
+#ifndef NODEVICE
+    close(fd_);
+    useCount_--;
+#endif
+    return true;
+  }
+
+  uint8_t MCP23S17::readRegister(uint8_t reg, uint8_t hw_addr)
+  {
+#ifndef NODEVICE
+
+    uint8_t control_byte = getSPIControlByte(READ_CMD, hw_addr);
+    uint8_t tx_buf[3] = {control_byte, reg, 0};
+    uint8_t rx_buf[sizeof tx_buf];
+
+    struct spi_ioc_transfer spi;
+    spi.tx_buf = (unsigned long) tx_buf;
+    spi.rx_buf = (unsigned long) rx_buf;
+    spi.len = sizeof tx_buf;
+    spi.delay_usecs = spi_delay;
+    spi.speed_hz = spi_speed;
+    spi.bits_per_word = spi_bpw;
+
+    // do the SPI transaction
+    if ((ioctl(fd_, SPI_IOC_MESSAGE(1), &spi) < 0)) {
+      Log() << "MCP23S17::readRegister: There was a error during the SPI transaction";
+      return -1;
+    }
+
+    // return the data
+    return rx_buf[2];
 
 #else
-  return 0;
+    return 0;
 #endif
-}
+  }
 
-void MCP23S17::writeRegister(MCP23S17_REG reg, uint8_t hw_addr, uint8_t data)
-{
+  void MCP23S17::writeRegister(uint8_t reg, uint8_t hw_addr, uint8_t data)
+  {
 #ifndef NODEVICE
 
-  uint8_t control_byte = getSPIControlByte(WRITE_CMD, hw_addr);
-  uint8_t tx_buf[3] = {control_byte, reg, data};
-  uint8_t rx_buf[sizeof tx_buf];
+    uint8_t control_byte = getSPIControlByte(WRITE_CMD, hw_addr);
+    uint8_t tx_buf[3] = {control_byte, reg, data};
+    uint8_t rx_buf[sizeof tx_buf];
 
-  struct spi_ioc_transfer spi;
-  spi.tx_buf = (unsigned long) tx_buf;
-  spi.rx_buf = (unsigned long) rx_buf;
-  spi.len = sizeof tx_buf;
-  spi.delay_usecs = spi_delay;
-  spi.speed_hz = spi_speed;
-  spi.bits_per_word = spi_bpw;
+    struct spi_ioc_transfer spi;
+    spi.tx_buf = (unsigned long) tx_buf;
+    spi.rx_buf = (unsigned long) rx_buf;
+    spi.len = sizeof tx_buf;
+    spi.delay_usecs = spi_delay;
+    spi.speed_hz = spi_speed;
+    spi.bits_per_word = spi_bpw;
 
-  // do the SPI transaction
-  if ((ioctl(fd_, SPI_IOC_MESSAGE(1), &spi) < 0)) {
-    PiFaceLog() << "MCP23S17::writeRegister: There was a error during the SPI transaction";
-  }
+    // do the SPI transaction
+    if ((ioctl(fd_, SPI_IOC_MESSAGE(1), &spi) < 0)) {
+      Log() << "MCP23S17::writeRegister: There was a error during the SPI transaction";
+    }
 
 #endif
-}
-
-uint8_t MCP23S17::readBit(uint8_t bit, MCP23S17_REG reg, uint8_t hw_addr)
-{
-  return (readRegister(reg, hw_addr) >> bit) & 1;
-}
-
-void MCP23S17::writeBit(uint8_t bit, MCP23S17_REG reg, uint8_t hw_addr, uint8_t data)
-{
-  uint8_t reg_data = readRegister(reg, hw_addr);
-  if (data) {
-    reg_data |= 1 << bit; // set
-  } else {
-    reg_data &= 0xff ^ (1 << bit); // clear
   }
 
-  writeRegister(reg, hw_addr, reg_data);
-}
+  uint8_t MCP23S17::readBit(uint8_t bit, uint8_t reg, uint8_t hw_addr)
+  {
+    return (readRegister(reg, hw_addr) >> bit) & 1;
+  }
 
-/**
- * Returns an SPI control byte.
- *
- * The MCP23S17 is a slave SPI device. The slave address contains four
- * fixed bits (0b0100) and three user-defined hardware address bits
- * (if enabled via IOCON.HAEN; pins A2, A1 and A0) with the
- * read/write command bit filling out the rest of the control byte::
- *
- *     +--------------------+
- *     |0|1|0|0|A2|A1|A0|R/W|
- *     +--------------------+
- *     |fixed  |hw_addr |R/W|
- *     +--------------------+
- *     |7|6|5|4|3 |2 |1 | 0 |
- *     +--------------------+
- *
- */
-uint8_t MCP23S17::getSPIControlByte(MCP23S17_CMD cmd, uint8_t hw_addr)
-{
-  hw_addr = (hw_addr << 1) & 0xE;
-  uint8_t rw_cmd = cmd;
-  rw_cmd &= 1; // just 1 bit long
-  return 0x40 | hw_addr | cmd;
-}
+  void MCP23S17::writeBit(uint8_t bit, uint8_t reg, uint8_t hw_addr, uint8_t data)
+  {
+    uint8_t reg_data = readRegister(reg, hw_addr);
+    if (data) {
+      reg_data |= 1 << bit; // set
+    } else {
+      reg_data &= 0xff ^ (1 << bit); // clear
+    }
+
+    writeRegister(reg, hw_addr, reg_data);
+  }
+
+  /**
+   * Returns an SPI control byte.
+   *
+   * The MCP23S17 is a slave SPI device. The slave address contains four
+   * fixed bits (0b0100) and three user-defined hardware address bits
+   * (if enabled via IOCON.HAEN; pins A2, A1 and A0) with the
+   * read/write command bit filling out the rest of the control byte::
+   *
+   *     +--------------------+
+   *     |0|1|0|0|A2|A1|A0|R/W|
+   *     +--------------------+
+   *     |fixed  |hw_addr |R/W|
+   *     +--------------------+
+   *     |7|6|5|4|3 |2 |1 | 0 |
+   *     +--------------------+
+   *
+   */
+  uint8_t MCP23S17::getSPIControlByte(VMCP23S17::COMMAND cmd, uint8_t hw_addr)
+  {
+    hw_addr = (hw_addr << 1) & 0xE;
+    uint8_t rw_cmd = cmd;
+    rw_cmd &= 1; // just 1 bit long
+    return 0x40 | hw_addr | cmd;
+  }
+
+};

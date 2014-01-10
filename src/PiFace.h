@@ -26,26 +26,37 @@
 
 #include <cstdint>
 
-#include <VPiFace.h>
+#include <VMCP23S17.h>
 
-class PiFace : public VPiFace
-{
-public:
+namespace NeguPi {
 
-  explicit PiFace(uint8_t hw_addr);
-  virtual ~PiFace();
+  class PiFace
+  {
+  public:
 
-  bool init();  
+    enum GPIO {
+      Output = 0x12,
+      Input  = 0x13
+    };
 
-  uint8_t readRegister(uint8_t reg);
-  void writeRegister(uint8_t data, uint8_t reg);
-  uint8_t readBit(uint8_t bit, uint8_t reg);
-  void writeBit(uint8_t data, uint8_t bit, uint8_t reg);
+    explicit PiFace(uint8_t hw_addr, uint8_t bus = 0, uint8_t cs = 0);
+    virtual ~PiFace();
+
+    bool init();
+
+    uint8_t readRegister(uint8_t reg);
+    void writeRegister(uint8_t reg, uint8_t data);
+    uint8_t readBit(uint8_t bit, uint8_t reg);
+    void writeBit(uint8_t bit, uint8_t reg, uint8_t data);
+
+  protected:
+
+    uint8_t hw_addr_;
+    VMCP23S17* mcp23s17_;
+
+    static uint8_t useCount_;
+  };
   
-protected:
-
-  static uint8_t usecount_;
-  static int mcp23s17_fd_;
 };
 
 #endif // PIFACE_H

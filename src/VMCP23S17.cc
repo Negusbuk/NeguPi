@@ -20,9 +20,13 @@
 
 #include "VMCP23S17.h"
 
-VMCP23S17::VMCP23S17(uint8_t bus, uint8_t cs)
-:bus_(bus),
- cs_(cs)
-{
+namespace NeguPi {
 
-}
+  VMCP23S17::VMCP23S17(uint8_t bus, uint8_t cs)
+  :bus_(bus),
+   cs_(cs)
+  {
+
+  }
+
+};

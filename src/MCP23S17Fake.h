@@ -25,25 +25,29 @@
 
 #include <VMCP23S17.h>
 
-class MCP23S17Fake : public VMCP23S17
-{
-public:
+namespace NeguPi {
 
-  explicit MCP23S17Fake(uint8_t bus, uint8_t cs);
-  virtual ~MCP23S17Fake() { }
+  class MCP23S17Fake : public VMCP23S17
+  {
+  public:
 
-  virtual bool open();
-  virtual bool close();
+    explicit MCP23S17Fake(uint8_t bus, uint8_t cs);
+    virtual ~MCP23S17Fake() { }
 
-  virtual uint8_t readRegister(MCP23S17_REG reg, uint8_t hw_addr);
-  virtual void writeRegister(MCP23S17_REG reg, uint8_t hw_addr, uint8_t data);
+    virtual bool open();
+    virtual bool close();
 
-  virtual uint8_t readBit(uint8_t bit, MCP23S17_REG reg, uint8_t hw_addr);
-  virtual void writeBit(uint8_t bit, MCP23S17_REG reg, uint8_t hw_addr, uint8_t data);
+    virtual uint8_t readRegister(uint8_t reg, uint8_t hw_addr);
+    virtual void writeRegister(uint8_t reg, uint8_t hw_addr, uint8_t data);
 
-protected:
+    virtual uint8_t readBit(uint8_t bit, uint8_t reg, uint8_t hw_addr);
+    virtual void writeBit(uint8_t bit, uint8_t reg, uint8_t hw_addr, uint8_t data);
 
-  uint8_t registers_[NREGISTERS];
+  protected:
+
+    uint8_t registers_[NREGISTERS];
+  };
+
 };
 
 #endif // MCP23S17Fake_H

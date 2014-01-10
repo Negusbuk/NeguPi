@@ -30,36 +30,42 @@
 
 #include <VMCP23S17.h>
 
-class MCP23S17 : public VMCP23S17
-{
-public:
+namespace NeguPi {
 
-  explicit MCP23S17(uint8_t bus, uint8_t cs);
-  virtual ~MCP23S17() { }
+  class MCP23S17 : public VMCP23S17
+  {
+  public:
 
-  virtual bool open();
-  virtual bool close();
+    explicit MCP23S17(uint8_t bus, uint8_t cs);
+    virtual ~MCP23S17() { }
 
-  virtual uint8_t readRegister(MCP23S17_REG reg, uint8_t hw_addr);
-  virtual void writeRegister(MCP23S17_REG reg, uint8_t hw_addr, uint8_t data);
+    virtual bool open();
+    virtual bool close();
 
-  virtual uint8_t readBit(uint8_t bit, MCP23S17_REG reg, uint8_t hw_addr);
-  virtual void writeBit(uint8_t bit, MCP23S17_REG reg, uint8_t hw_addr, uint8_t data);
+    virtual uint8_t readRegister(uint8_t reg, uint8_t hw_addr);
+    virtual void writeRegister(uint8_t reg, uint8_t hw_addr, uint8_t data);
 
-protected:
+    virtual uint8_t readBit(uint8_t bit, uint8_t reg, uint8_t hw_addr);
+    virtual void writeBit(uint8_t bit, uint8_t reg, uint8_t hw_addr, uint8_t data);
 
-  uint8_t getSPIControlByte(MCP23S17_CMD cmd, uint8_t hw_addr);
+  protected:
 
-  int fd_;
+    uint8_t getSPIControlByte(VMCP23S17::COMMAND cmd, uint8_t hw_addr);
 
-  const uint8_t spi_mode_ = 0;
-  const uint8_t spi_bpw_ = 8; // bits per word
-  const uint32_t spi_speed_ = 10000000; // 10MHz
-  const uint16_t spi_delay_ = 0;
-  const char * spidev_[2][2] = {
-      {"/dev/spidev0.0", "/dev/spidev0.1"},
-      {"/dev/spidev1.0", "/dev/spidev1.1"},
+    int fd_;
+
+    const uint8_t spi_mode_ = 0;
+    const uint8_t spi_bpw_ = 8; // bits per word
+    const uint32_t spi_speed_ = 10000000; // 10MHz
+    const uint16_t spi_delay_ = 0;
+    const char * spidev_[2][2] = {
+                                  {"/dev/spidev0.0", "/dev/spidev0.1"},
+                                  {"/dev/spidev1.0", "/dev/spidev1.1"},
+    };
+
+    static uint8_t useCount_;
   };
+
 };
 
 #endif // MCP23S17_H

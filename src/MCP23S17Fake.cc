@@ -20,47 +20,51 @@
 
 #include "MCP23S17Fake.h"
 
-MCP23S17Fake::MCP23S17Fake(uint8_t bus, uint8_t cs)
-:VMCP23S17(bus, cs)
-{
-  for (uint8_t i=0;i<NREGISTERS;++i) {
-    registers_[i] = 0;
-  }
-}
+namespace NeguPi {
 
-bool MCP23S17Fake::open()
-{
-  return true;
-}
-
-bool MCP23S17Fake::close()
-{
-  return true;
-}
-
-uint8_t MCP23S17Fake::readRegister(MCP23S17_REG reg, uint8_t hw_addr)
-{
-  return registers_[reg];
-}
-
-void MCP23S17Fake::writeRegister(MCP23S17_REG reg, uint8_t hw_addr, uint8_t data)
-{
-  registers_[reg] = data;
-}
-
-uint8_t MCP23S17Fake::readBit(uint8_t bit, MCP23S17_REG reg, uint8_t hw_addr)
-{
-  return (registers_[reg] >> bit) & 1;
-}
-
-void MCP23S17Fake::writeBit(uint8_t bit, MCP23S17_REG reg, uint8_t hw_addr, uint8_t data)
-{
-  uint8_t reg_data = readRegister(reg, hw_addr);
-  if (data) {
-    reg_data |= 1 << bit; // set
-  } else {
-    reg_data &= 0xff ^ (1 << bit); // clear
+  MCP23S17Fake::MCP23S17Fake(uint8_t bus, uint8_t cs)
+  :VMCP23S17(bus, cs)
+  {
+    for (uint8_t i=0;i<NREGISTERS;++i) {
+      registers_[i] = 0;
+    }
   }
 
-  writeRegister(reg, hw_addr, reg_data);
-}
+  bool MCP23S17Fake::open()
+  {
+    return true;
+  }
+
+  bool MCP23S17Fake::close()
+  {
+    return true;
+  }
+
+  uint8_t MCP23S17Fake::readRegister(uint8_t reg, uint8_t hw_addr)
+  {
+    return registers_[reg];
+  }
+
+  void MCP23S17Fake::writeRegister(uint8_t reg, uint8_t hw_addr, uint8_t data)
+  {
+    registers_[reg] = data;
+  }
+
+  uint8_t MCP23S17Fake::readBit(uint8_t bit, uint8_t reg, uint8_t hw_addr)
+  {
+    return (registers_[reg] >> bit) & 1;
+  }
+
+  void MCP23S17Fake::writeBit(uint8_t bit, uint8_t reg, uint8_t hw_addr, uint8_t data)
+  {
+    uint8_t reg_data = readRegister(reg, hw_addr);
+    if (data) {
+      reg_data |= 1 << bit; // set
+    } else {
+      reg_data &= 0xff ^ (1 << bit); // clear
+    }
+
+    writeRegister(reg, hw_addr, reg_data);
+  }
+
+};

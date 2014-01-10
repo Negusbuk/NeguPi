@@ -26,13 +26,13 @@ LIBFLAGS=$(foreach TMP,$(LIBPATHS),-L$(TMP))
 
 all: $(EXAMPLES)
 
-blink: blink.cc
+blink: blink.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
-statemachine: statemachine.cc
+statemachine: statemachine.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
-timelapse: timelapse.cc
+timelapse: timelapse.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 	
 distclean: clean

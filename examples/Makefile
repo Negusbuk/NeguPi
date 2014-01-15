@@ -51,7 +51,7 @@ distclean: clean
 clean:
 	rm -f $(EXAMPLES)
 
-install:
-	mkdir ../bin
-	cp $(EXAMPLES) ../bin
-
+install: all
+	@(test -e ~/bin || mkdir ~/bin)
+	cp $(EXAMPLES) ~/bin
+	cp videocapture.py ~/bin

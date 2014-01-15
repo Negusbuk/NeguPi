@@ -68,7 +68,7 @@ public:
     }
 
     args.clear();
-    args.push_back("videocapture.py");
+    args.push_back("/home/pi/bin/videocapture.py");
     args.push_back(outputDir_ + "/clip_XXX_YYYYYYYY.h264 ");
 
     clipArgs_ = new char *[args.size() + 1];
@@ -124,14 +124,14 @@ public:
 
       if (delay_>timeout_) {
         // Log() << "beat " << delay_;
-
-        sprintf(clipArgs_[nClipArgs_-1],
-                "%s/clip_%03d_%06d.h264",
-                outputDir_.c_str(), clipLoopCount_, clipCount_++);
-        
+       
         struct stat buffer;
         if (stat("/tmp/videocapture.lck", &buffer) != 0) {
 
+          sprintf(clipArgs_[nClipArgs_-1],
+                  "%s/clip_%03d_%06d.h264",
+                  outputDir_.c_str(), clipLoopCount_, clipCount_++);
+ 
           Log() << "starting new clip " << clipArgs_[nClipArgs_-1];
 
           pid_t child_pid = fork();

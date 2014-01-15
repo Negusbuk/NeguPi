@@ -161,7 +161,7 @@ public:
       filename = dirp->d_name;
       if (strncmp(filename.c_str(), "image_", 6)!=0) continue;
 
-      filename = filename.substr(7, 7+3);
+      filename = filename.substr(6, 6+3);
       loop = std::stoi(filename);
       if (loop>imageLoopCount_) imageLoopCount_ = loop;
     }

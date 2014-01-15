@@ -90,7 +90,7 @@ public:
     }
 
     args.clear();
-    args.push_back("videocapture.py");
+    args.push_back("/home/pi/bin/videocapture.py");
     args.push_back(outputClipDir_ + "/clip_XXX_YYYYYYYY.h264 ");
 
     clipArgs_ = new char *[args.size() + 1];
@@ -181,13 +181,13 @@ public:
     if (inClipLoop_) {
       delayClip_ += milliseconds;
       if (delayClip_>timeoutClip_) {
-
-        sprintf(clipArgs_[nClipArgs_-1],
-                "%s/clip_%03d_%06d.h264",
-                outputClipDir_.c_str(), clipLoopCount_, clipCount_++);
         
         struct stat buffer;
         if (stat("/tmp/videocapture.lck", &buffer) != 0) {
+
+          sprintf(clipArgs_[nClipArgs_-1],
+                  "%s/clip_%03d_%06d.h264",
+                  outputClipDir_.c_str(), clipLoopCount_, clipCount_++);
 
           Log() << "starting new clip " << clipArgs_[nClipArgs_-1];
 
@@ -222,7 +222,7 @@ public:
       filename = dirp->d_name;
       if (strncmp(filename.c_str(), "image_", 6)!=0) continue;
 
-      filename = filename.substr(7, 7+3);
+      filename = filename.substr(6, 6+3);
       loop = std::stoi(filename);
       if (loop>imageLoopCount_) imageLoopCount_ = loop;
     }
@@ -249,7 +249,7 @@ public:
       filename = dirp->d_name;
       if (strncmp(filename.c_str(), "clip_", 5)!=0) continue;
 
-      filename = filename.substr(6, 6+3);
+      filename = filename.substr(5, 5+3);
       loop = std::stoi(filename);
       if (loop>clipLoopCount_) clipLoopCount_ = loop;
     }
@@ -284,7 +284,7 @@ int main(int argc, char * argv[])
 {
   Daemonize("camerabox");
   Logger::instance(true);
-  
+
   int hw_addr = 0;
   if (argc > 1) {
     hw_addr = atoi(argv[1]);

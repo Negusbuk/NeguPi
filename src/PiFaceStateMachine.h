@@ -36,6 +36,7 @@ namespace NeguPi {
     virtual ~PiFaceStateMachine();
 
     void run();
+    void checkInputStates();
 
     virtual void input0Changed(uint8_t state) { }
     virtual void input1Changed(uint8_t state) { }

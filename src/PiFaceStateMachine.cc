@@ -94,4 +94,33 @@ namespace NeguPi {
     }
   }
 
+  void PiFaceStateMachine::checkInputStates()
+  {
+    uint8_t state, bits, masks[8], data;
+
+    uint8_t mask = 1;
+    for (uint8_t i=0;i<8;++i) {
+      masks[i] = mask;
+      mask <<= 1;
+    }
+ 
+    state = piface_->readRegister(PiFace::Input);
+      
+    if (state!=lastInputState_) {
+
+      bits = state ^ lastInputState_;
+
+      for (uint8_t i=0;i<8;++i) {
+
+        if (bits & masks[i]) {
+          data = (state & masks[i]) ? 1 : 0;
+          // PiFaceLog() << "bit " << (int)i << ": " << (int)data;
+          functions_[i](this, data);
+        }
+     }
+   }
+
+   lastInputState_ = state;
+ }
+
 };

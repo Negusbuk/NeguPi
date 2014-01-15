@@ -2,6 +2,7 @@ EXAMPLES= blink \
           statemachine \
           timelapse \
           videocapture \
+          camerabox
 
 INCPATHS=../src
 LIBPATHS=../src
@@ -39,6 +40,9 @@ timelapse: timelapse.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
 videocapture: videocapture.cc ../src/libNeguPi.a
+	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
+
+camerabox: camerabox.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 	
 distclean: clean

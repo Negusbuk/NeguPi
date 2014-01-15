@@ -1,4 +1,7 @@
-EXAMPLES=blink statemachine timelapse
+EXAMPLES= blink \
+          statemachine \
+          timelapse \
+          videocapture \
 
 INCPATHS=../src
 LIBPATHS=../src
@@ -33,6 +36,9 @@ statemachine: statemachine.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
 timelapse: timelapse.cc ../src/libNeguPi.a
+	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
+
+videocapture: videocapture.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 	
 distclean: clean

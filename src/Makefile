@@ -41,9 +41,9 @@ libNeguPi.a: $(OBJECTS)
 	$(CPP) $(INCFLAGS) $(CPPFLAGS) -fPIC $< -o $@
 
 install:
-	mkdir ../include
+	@(test -e ../include || mkdir ../include)
 	cp $(HEADERS) ../include
-	mkdir ../lib
+	@(test -e ../lib || mkdir ../lib)
 	cp libNeguPi.a ../lib
 	
 distclean: clean

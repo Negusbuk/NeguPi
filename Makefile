@@ -16,3 +16,6 @@ clean:
 
 doc:
 	doxygen documentation/Doxyfile
+	cd html
+	git push origin gh-pages
+	cd ..

@@ -13,3 +13,6 @@ distclean: clean
 clean:
 	make -C src clean
 	make -C examples clean
+
+doc:
+	doxygen documentation/Doxyfile

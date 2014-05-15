@@ -11,9 +11,13 @@ MACHINE:= $(shell uname -m)
 NODEVICE=0
 ifneq "$(MACHINE)" "armv6l"
 	NODEVICE=1
+	INCPATHS+=/opt/local/include
+	LDFLAGS=-L/opt/local/lib -lconfig++
+else
+	LDFLAGS=-lconfig++
 endif
 
-LDFLAGS=-L../src -lNeguPi
+LDFLAGS+=-L../src -lNeguPi
 CPPFLAGS=-std=c++0x -Wall
 CPP=g++
 

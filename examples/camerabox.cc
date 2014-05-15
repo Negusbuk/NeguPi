@@ -32,12 +32,15 @@
 #include <thread>
 #include <chrono>
 
+#include <libconfig.h++>
+
 #include <NeguPiDaemon.h>
 #include <NeguPiLogger.h>
 
 #include <PiFace.h>
 #include <PiFaceStateMachine.h>
 
+using namespace libconfig;
 using namespace NeguPi;
 
 class CameraBox : public PiFaceStateMachine
@@ -48,8 +51,6 @@ public:
     PiFaceStateMachine(piface),
     inImageLoop_(false),
     inClipLoop_(false),
-    timeoutImage_(2*1000),
-    timeoutClip_(2*1000),
     delayImage_(0),
     delayClip_(0),
     imageLoopCount_(1),
@@ -57,8 +58,7 @@ public:
     clipLoopCount_(1),
     clipCount_(1) {
 
-    outputImageDir_ = "/home/pi/timelapse";
-    outputClipDir_ = "/home/pi/videocapture";
+    readConfig();
 
     std::vector<std::string> args;
     args.push_back("raspistill");
@@ -261,6 +261,78 @@ public:
 
 protected:
 
+  void readConfig() {
+
+    bool writeCfg = false;
+    std::string homePath = getenv("HOME");
+    std::string cfgFile = homePath + "/.NeguPi.cfg";
+    Config cfg;
+    try {
+      cfg.readFile(cfgFile.c_str());
+    }
+    catch (const FileIOException &fioex) {
+      std::cerr << "NeguPi: I/O error while reading config file " << cfgFile << std::endl;
+      writeCfg = true;
+    }
+    catch (const ParseException &pex) {
+      std::cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
+          << " - " << pex.getError() << std::endl;
+      writeCfg = true;
+    }
+    catch (...) {
+      writeCfg = true;
+    }
+
+    Setting &root = cfg.getRoot();
+    if (!root.exists("camerabox")) {
+      root.add("camerabox", Setting::TypeGroup);
+      writeCfg = true;
+    }
+    Setting &settings = root["camerabox"];
+
+    if (!settings.lookupValue("imageDir", outputImageDir_)) {
+      outputImageDir_ = homePath + "/timelapse";
+      settings.add("imageDir", Setting::TypeString) = outputImageDir_.c_str();
+      writeCfg = true;
+    }
+
+    if (!settings.lookupValue("clipDir", outputClipDir_)) {
+      outputClipDir_ = homePath + "/videocapture";
+      settings.add("clipDir", Setting::TypeString) = outputClipDir_.c_str();
+      writeCfg = true;
+    }
+
+    if (!settings.lookupValue("timeoutImage", timeoutImage_)) {
+      timeoutImage_ = 2*1000;
+      settings.add("timeoutImage", Setting::TypeInt) = timeoutImage_;
+      writeCfg = true;
+    }
+
+    if (!settings.lookupValue("timeoutClip", timeoutClip_)) {
+      timeoutClip_ = 2*1000;
+      settings.add("timeoutClip", Setting::TypeInt) = timeoutClip_;
+      writeCfg = true;
+    }
+
+    if (writeCfg) {
+      try {
+        cfg.writeFile(cfgFile.c_str());
+        std::cerr << "NeguPi: configuration successfully written to " << cfgFile << std::endl;
+      }
+      catch (const FileIOException &fioex) {
+        std::cerr << "NeguPi: I/O error while writing config file " << cfgFile << std::endl;
+      }
+      catch (...) {
+
+      }
+    }
+  }
+
+  std::string outputImageDir_;
+  std::string outputClipDir_;
+  int timeoutImage_;
+  int timeoutClip_;
+
   char** previewArgs_;
   int nImageArgs_;
   char** imageArgs_;
@@ -268,10 +340,6 @@ protected:
   char** clipArgs_;
   bool inImageLoop_;
   bool inClipLoop_;
-  std::string outputImageDir_;
-  std::string outputClipDir_;
-  int timeoutImage_;
-  int timeoutClip_;
   int delayImage_;
   int delayClip_;
   int imageLoopCount_;

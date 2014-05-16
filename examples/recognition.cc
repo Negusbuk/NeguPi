@@ -34,6 +34,10 @@
 
 #include <libconfig.h++>
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/features2d/features2d.hpp>
+
 #include <NeguPiDaemon.h>
 #include <NeguPiLogger.h>
 
@@ -102,6 +106,9 @@ public:
         execvp(previewArgs_[0], previewArgs_);
         /* The execvp function returns only if an error occurs.  */
         printf ("an error occurred in execl\n");
+
+        cv::Mat img = cv::imread("test.jpg");
+
         abort();
       }
     }

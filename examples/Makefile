@@ -2,7 +2,8 @@ EXAMPLES= blink \
           statemachine \
           timelapse \
           videocapture \
-          camerabox
+          camerabox \
+	  recognition
 
 INCPATHS=../src
 LIBPATHS=../src
@@ -11,9 +12,13 @@ MACHINE:= $(shell uname -m)
 NODEVICE=0
 ifneq "$(MACHINE)" "armv6l"
 	NODEVICE=1
+	INCPATHS+=/opt/local/include /opt/local/include/opencv /opt/local/include/opencv2
+	LDFLAGS=-L/opt/local/lib -lconfig++ -lopencv_core -lopencv_highgui
+else
+	LDFLAGS=-lconfig++
 endif
 
-LDFLAGS=-L../src -lNeguPi -lconfig++
+LDFLAGS=-L../src -lNeguPi
 CPPFLAGS=-std=c++0x -Wall
 CPP=g++
 
@@ -46,6 +51,9 @@ videocapture: videocapture.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
 camerabox: camerabox.cc ../src/libNeguPi.a
+	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
+
+recognition: recognition.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 	
 distclean: clean

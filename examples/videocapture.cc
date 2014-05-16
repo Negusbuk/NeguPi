@@ -32,12 +32,15 @@
 #include <thread>
 #include <chrono>
 
+#include <libconfig.h++>
+
 #include <NeguPiDaemon.h>
 #include <NeguPiLogger.h>
 
 #include <PiFace.h>
 #include <PiFaceStateMachine.h>
 
+using namespace libconfig;
 using namespace NeguPi;
 
 class VideoCapture : public PiFaceStateMachine
@@ -47,11 +50,10 @@ public:
   VideoCapture(PiFace* piface) :
     PiFaceStateMachine(piface),
     inVideoCapture_(false),
-    timeout_(2*1000),
     clipLoopCount_(1),
     clipCount_(1) {
 
-    outputDir_ = "/home/pi/videocapture";
+    readConfig();
 
     std::vector<std::string> args;
     args.push_back("raspistill");
@@ -177,12 +179,68 @@ public:
 
 protected:
 
+  void readConfig() {
+
+    bool writeCfg = false;
+    std::string homePath = getenv("HOME");
+    std::string cfgFile = homePath + "/.NeguPi.cfg";
+    Config cfg;
+    try {
+      cfg.readFile(cfgFile.c_str());
+    }
+    catch (const FileIOException &fioex) {
+      std::cerr << "NeguPi: I/O error while reading config file " << cfgFile << std::endl;
+      writeCfg = true;
+    }
+    catch (const ParseException &pex) {
+      std::cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
+          << " - " << pex.getError() << std::endl;
+      writeCfg = true;
+    }
+    catch (...) {
+      writeCfg = true;
+    }
+
+    Setting &root = cfg.getRoot();
+    if (!root.exists("videocapture")) {
+      root.add("videocapture", Setting::TypeGroup);
+      writeCfg = true;
+    }
+    Setting &settings = root["videocapture"];
+
+    if (!settings.lookupValue("clipDir", outputDir_)) {
+      outputDir_ = homePath + "/videocapture";
+      settings.add("clipDir", Setting::TypeString) = outputDir_.c_str();
+      writeCfg = true;
+    }
+
+    if (!settings.lookupValue("timeout", timeout_)) {
+      timeout_ = 2*1000;
+      settings.add("timeout", Setting::TypeInt) = timeout_;
+      writeCfg = true;
+    }
+
+    if (writeCfg) {
+      try {
+        cfg.writeFile(cfgFile.c_str());
+        std::cerr << "NeguPi: configuration successfully written to " << cfgFile << std::endl;
+      }
+      catch (const FileIOException &fioex) {
+        std::cerr << "NeguPi: I/O error while writing config file " << cfgFile << std::endl;
+      }
+      catch (...) {
+
+      }
+    }
+  }
+
+  std::string outputDir_;
+  int timeout_;
+
   char** previewArgs_;
   int nClipArgs_;
   char** clipArgs_;
   bool inVideoCapture_;
-  std::string outputDir_;
-  int timeout_;
   int delay_;
   int clipLoopCount_;
   int clipCount_;

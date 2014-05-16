@@ -10,7 +10,8 @@ if len(sys.argv) != 2:
     sys.exit()
 
 basename = sys.argv[1] 
-basecmd = "raspistill --width 1296 --height 972 --quality 100 --exif testID="
+#basecmd = "raspistill --width 1296 --height 972 --quality 100 --exif testID="
+basecmd = "raspistill --width 648 --height 486 --quality 100 --exif testID="
 count = 1
 
 def acquirePicture(cmd):
@@ -19,8 +20,10 @@ def acquirePicture(cmd):
     idname = "%02d " % count
     count = count + 1
     print basecmd + idname + cmd + " --output " + basename + fname
-    #os.system(basecmd + idname + cmd + " --output " + basename + fname)
+    os.system(basecmd + idname + cmd + " --output " + basename + fname)
     #os.system("sleep 1")
+
+acquirePicture("")
 
 acquirePicture("-awb off --ISO 0")
 acquirePicture("-awb off --ISO 100")

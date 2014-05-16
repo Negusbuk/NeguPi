@@ -13,12 +13,15 @@ ifneq "$(MACHINE)" "armv6l"
 	NODEVICE=1
 endif
 
-LDFLAGS=-L../src -lNeguPi
+LDFLAGS=-L../src -lNeguPi -lconfig++
 CPPFLAGS=-std=c++0x -Wall
 CPP=g++
 
 ifeq "$(NODEVICE)" "1"
 CPPFLAGS+= -DNODEVICE
+else
+CPPFLAGS+= $(shell pkg-config --cflags opencv)
+LDFLAGS+= $(shell pkg-config --libs opencv)
 endif
 
 # ------------ MAGIC BEGINS HERE -------------

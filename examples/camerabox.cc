@@ -25,12 +25,24 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
+#include <fstream>
 #include <iostream>
 #include <vector>
+#include <map>
 #include <string>
 #include <thread>
 #include <chrono>
+
+#include <libconfig.h++>
+
+#ifndef NODEVICE
+#include <cv.h>
+#include <highgui.h>
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#endif
 
 #include <NeguPiDaemon.h>
 #include <NeguPiLogger.h>
@@ -38,6 +50,7 @@
 #include <PiFace.h>
 #include <PiFaceStateMachine.h>
 
+using namespace libconfig;
 using namespace NeguPi;
 
 class CameraBox : public PiFaceStateMachine
@@ -60,36 +73,60 @@ public:
     outputImageDir_ = "/home/pi/timelapse";
     outputClipDir_ = "/home/pi/videocapture";
 
+    Config conf;
+    try {
+      conf.readFile("/home/pi/.NeguPi");
+    }
+    catch (FileIOException &fioex) {
+      std::cerr << "NeguPi: I/O error while reading config file." << std::endl;
+    }
+    catch (ParseException &pex) {
+      std::cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
+                << " - " << pex.getError() << std::endl;
+    }
+
+    imageOptions_["ISO"] = "100";
+    imageOptions_["awb"] = "off";
+    imageOptions_["mm"] = "average";
+    imageOptions_["ex"] = "auto";
+    //imageOptions_["-ss"] = "100000";
+
+    previewArgsVector_.push_back("raspistill");
+    previewArgsVector_.push_back("--width"); previewArgsVector_.push_back("960");
+    previewArgsVector_.push_back("--height"); previewArgsVector_.push_back("540");
+    previewArgsVector_.push_back("--timeout"); previewArgsVector_.push_back("1");
+    previewArgsVector_.push_back("--output"); previewArgsVector_.push_back("/home/pi/www/preview.jpg");
+
+    previewArgs_ = new char *[previewArgsVector_.size() + 2*imageOptions_.size() + 1];
+    previewArgs_[previewArgsVector_.size() + 2*imageOptions_.size()] = 0;
+
+    for (uint8_t i=0;i<previewArgsVector_.size();++i) {
+      previewArgs_[i] = strdup(previewArgsVector_.at(i).c_str());
+    }
+
+    imageArgsVector_.push_back("raspistill");
+    imageArgsVector_.push_back("--width"); imageArgsVector_.push_back("960" /*"1280"*/);
+    imageArgsVector_.push_back("--height"); imageArgsVector_.push_back("540" /*"720"*/);
+    imageArgsVector_.push_back("--timeout"); imageArgsVector_.push_back("1");
+    //args.push_back("--ISO"); args.push_back("100");
+    //args.push_back("--ev"); args.push_back("0");
+    //args.push_back("--exposure"); args.push_back("fixedfps");
+    //args.push_back("--awb"); args.push_back("off");
+    //args.push_back("--metering"); args.push_back("matrix");
+    //args.push_back("--shutter"); args.push_back("10000");
+    imageArgsVector_.push_back("--output"); imageArgsVector_.push_back(outputImageDir_ + "/image_XXX_YYYYYYYY.jpg ");
+
+    imageArgs_ = new char *[imageArgsVector_.size() + 2*imageOptions_.size() + 1];
+    imageArgs_[imageArgsVector_.size() + 2*imageOptions_.size()] = 0;
+    nImageArgs_ = imageArgsVector_.size();
+
+    for (uint8_t i=0;i<imageArgsVector_.size();++i) {
+      imageArgs_[i] = strdup(imageArgsVector_.at(i).c_str());
+    }
+
+    readImageOptions();
+
     std::vector<std::string> args;
-    args.push_back("raspistill");
-    args.push_back("--width"); args.push_back("960");
-    args.push_back("--height"); args.push_back("540");
-    args.push_back("--timeout"); args.push_back("1");
-    args.push_back("--output"); args.push_back("/home/pi/www/preview.jpg");
-
-    previewArgs_ = new char *[args.size() + 1];
-    previewArgs_[args.size()] = 0;
-
-    for (uint8_t i=0;i<args.size();++i) {
-      previewArgs_[i] = strdup(args.at(i).c_str());
-    }
-
-    args.clear();
-    args.push_back("raspistill");
-    args.push_back("--width"); args.push_back("960");
-    args.push_back("--height"); args.push_back("540");
-    args.push_back("--timeout"); args.push_back("1");
-    args.push_back("--output"); args.push_back(outputImageDir_ + "/image_XXX_YYYYYYYY.jpg ");
-
-    imageArgs_ = new char *[args.size() + 1];
-    imageArgs_[args.size()] = 0;
-    nImageArgs_ = args.size();
-
-    for (uint8_t i=0;i<args.size();++i) {
-      imageArgs_[i] = strdup(args.at(i).c_str());
-    }
-
-    args.clear();
     args.push_back("/home/pi/bin/videocapture.py");
     args.push_back(outputClipDir_ + "/clip_XXX_YYYYYYYY.h264 ");
 
@@ -106,6 +143,8 @@ public:
 
     if (state==0) {
       Log() << "take new preview picture";
+
+      readImageOptions();
 
       pid_t child_pid = fork();
       if (child_pid == 0) {
@@ -172,7 +211,33 @@ public:
           /* The execvp function returns only if an error occurs.  */
           printf ("an error occurred in execl\n");
           abort();
+        } else if (child_pid > 0) {
+          int status;
+          waitpid(child_pid, &status, 0);
         }
+
+#ifndef NODEVICE
+        cv::Mat image = cv::imread(imageArgs_[nImageArgs_-1], 1);
+        cv::Mat gray_image;
+        cv::cvtColor(image, gray_image, CV_BGR2GRAY);
+
+        int bins = 256;
+        int histSize[] = { bins };
+        // Set ranges for histogram bins
+        float lranges[] = { 0, 256 };
+        const float* ranges[] = { lranges };
+        // create matrix for histogram
+        cv::Mat hist;
+        int channels[] = { 0 };
+        float sum = 0;
+
+        cv::calcHist(&gray_image, 1, channels, cv::Mat(), hist, 1, histSize, ranges, true, false);
+        for (int b = 0;b<bins;b++) {
+          sum += hist.at<float>(b);
+        }
+        sum /= (gray_image.rows*gray_image.cols);
+        Log() << "brightness: " << sum;
+#endif
 
         delayImage_ = 0;
       }
@@ -181,7 +246,7 @@ public:
     if (inClipLoop_) {
       delayClip_ += milliseconds;
       if (delayClip_>timeoutClip_) {
-        
+
         struct stat buffer;
         if (stat("/tmp/videocapture.lck", &buffer) != 0) {
 
@@ -259,11 +324,47 @@ public:
     closedir( dp );
   }
 
+  void readImageOptions() {
+
+    std::string key, value;
+    std::ifstream ifile("/home/pi/www/setup.txt");
+    while (ifile >> key >> value) {
+      std::map<std::string,std::string>::iterator it = imageOptions_.find(key);
+      if (it!=imageOptions_.end()) {
+        it->second = value;
+      }
+    }
+
+    uint8_t i=previewArgsVector_.size();
+    for (std::map<std::string,std::string>::iterator it = imageOptions_.begin();
+         it!=imageOptions_.end();
+         ++it) {
+      std::string key = std::string("-") + it->first.c_str();
+      previewArgs_[i++] = strdup(key.c_str());
+      previewArgs_[i++] = strdup(it->second.c_str());
+    }
+
+    i=imageArgsVector_.size();
+    for (std::map<std::string,std::string>::iterator it = imageOptions_.begin();
+         it!=imageOptions_.end();
+         ++it) {
+      std::string key = std::string("-") + it->first.c_str();
+      imageArgs_[i++] = strdup(key.c_str());
+      imageArgs_[i++] = strdup(it->second.c_str());
+    }
+  }
+
 protected:
 
+  std::map<std::string,std::string> imageOptions_;
+
+  std::vector<std::string> previewArgsVector_;
   char** previewArgs_;
+
   int nImageArgs_;
+  std::vector<std::string> imageArgsVector_;
   char** imageArgs_;
+
   int nClipArgs_;
   char** clipArgs_;
   bool inImageLoop_;
@@ -282,8 +383,8 @@ protected:
 
 int main(int argc, char * argv[])
 {
-  Daemonize("camerabox");
-  Logger::instance(true);
+  //Daemonize("camerabox");
+  //Logger::instance(true);
 
   int hw_addr = 0;
   if (argc > 1) {
@@ -296,5 +397,6 @@ int main(int argc, char * argv[])
 
   CameraBox cb(&pf);
 
-  cb.run();
+  cb.input0Changed(0);
+  //cb.run();
 }

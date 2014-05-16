@@ -11,8 +11,8 @@ MACHINE:= $(shell uname -m)
 NODEVICE=0
 ifneq "$(MACHINE)" "armv6l"
 	NODEVICE=1
-	INCPATHS+=/opt/local/include
-	LDFLAGS=-L/opt/local/lib -lconfig++
+	INCPATHS+=/opt/local/include /opt/local/include/opencv /opt/local/include/opencv2
+	LDFLAGS=-L/opt/local/lib -lconfig++ -lopencv_core -lopencv_highgui
 else
 	LDFLAGS=-lconfig++
 endif

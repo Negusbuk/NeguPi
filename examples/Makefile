@@ -18,8 +18,8 @@ else
 	LDFLAGS=-lconfig++
 endif
 
-LDFLAGS=-L../src -lNeguPi
-CPPFLAGS=-std=c++0x -Wall
+LDFLAGS+=-L../src -lNeguPi
+CPPFLAGS+=-std=c++0x -Wall
 CPP=g++
 
 ifeq "$(NODEVICE)" "1"

@@ -46,6 +46,20 @@
 using namespace libconfig;
 using namespace NeguPi;
 
+struct imageOptions {
+  std::string aISO;
+  int iISO;
+  std::string aEX;
+  std::string aSS;
+  int iSS;
+  std::string aMM;
+  std::string aEV;
+  std::string aSH;
+  std::string aCO;
+  std::string aBR;
+  std::string aSA;
+};
+
 class CameraBox : public PiFaceStateMachine
 {
 public:
@@ -63,52 +77,43 @@ public:
 
     readConfig();
 
-    Config conf;
-    try {
-      conf.readFile("/home/pi/.NeguPi");
-    }
-    catch (FileIOException &fioex) {
-      std::cerr << "NeguPi: I/O error while reading config file." << std::endl;
-    }
-    catch (ParseException &pex) {
-      std::cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
-                << " - " << pex.getError() << std::endl;
-    }
-
-    imageOptions_["ISO"] = "100";
-    imageOptions_["awb"] = "off";
-    imageOptions_["mm"] = "average";
-    imageOptions_["ex"] = "auto";
-    //imageOptions_["-ss"] = "100000";
+    imageOptions_.aISO = "0";
+    imageOptions_.iISO = 0;
+    imageOptions_.aEX = "antishake";
+    imageOptions_.aSS = "0";
+    imageOptions_.iSS = 0;
+    imageOptions_.aMM = "matrix";
+    imageOptions_.aEV = "0";
+    imageOptions_.aSH = "0";
+    imageOptions_.aCO = "0";
+    imageOptions_.aBR = "50";
+    imageOptions_.aSA = "0";
 
     previewArgsVector_.push_back("raspistill");
-    previewArgsVector_.push_back("--width"); previewArgsVector_.push_back("960");
-    previewArgsVector_.push_back("--height"); previewArgsVector_.push_back("540");
-    previewArgsVector_.push_back("--timeout"); previewArgsVector_.push_back("1");
-    previewArgsVector_.push_back("--output"); previewArgsVector_.push_back("/home/pi/www/preview.jpg");
+    previewArgsVector_.push_back("-w"); previewArgsVector_.push_back("960");
+    previewArgsVector_.push_back("-h"); previewArgsVector_.push_back("540");
+    previewArgsVector_.push_back("-t"); previewArgsVector_.push_back("1");
+    previewArgsVector_.push_back("-n"); previewArgsVector_.push_back("-n");
+    previewArgsVector_.push_back("-th"); previewArgsVector_.push_back("none");
+    previewArgsVector_.push_back("-o"); previewArgsVector_.push_back("/home/pi/www/preview.jpg");
 
-    previewArgs_ = new char *[previewArgsVector_.size() + 2*imageOptions_.size() + 1];
-    previewArgs_[previewArgsVector_.size() + 2*imageOptions_.size()] = 0;
+    previewArgs_ = new char *[previewArgsVector_.size() + 9*2 + 1];
+    previewArgs_[previewArgsVector_.size() + 9*2] = 0;
 
     for (uint8_t i=0;i<previewArgsVector_.size();++i) {
       previewArgs_[i] = strdup(previewArgsVector_.at(i).c_str());
     }
 
     imageArgsVector_.push_back("raspistill");
-    imageArgsVector_.push_back("--width"); imageArgsVector_.push_back("960" /*"1280"*/);
-    imageArgsVector_.push_back("--height"); imageArgsVector_.push_back("540" /*"720"*/);
-    imageArgsVector_.push_back("--timeout"); imageArgsVector_.push_back("1");
-    //args.push_back("--ISO"); args.push_back("100");
-    //args.push_back("--ev"); args.push_back("0");
-    //args.push_back("--exposure"); args.push_back("fixedfps");
-    //args.push_back("--awb"); args.push_back("off");
-    //args.push_back("--metering"); args.push_back("matrix");
-    //args.push_back("--shutter"); args.push_back("10000");
-    imageArgsVector_.push_back("--output"); imageArgsVector_.push_back(outputImageDir_ + "/image_XXX_YYYYYYYY.jpg ");
+    imageArgsVector_.push_back("-"); imageArgsVector_.push_back(outputImageDir_ + "/image_XXX_YYYYYYYY.jpg ");
+    imageArgsVector_.push_back("-w"); imageArgsVector_.push_back("960" /*"1280"*/);
+    imageArgsVector_.push_back("-h"); imageArgsVector_.push_back("540" /*"720"*/);
+    imageArgsVector_.push_back("-t"); imageArgsVector_.push_back("1");
+    imageArgsVector_.push_back("-n"); imageArgsVector_.push_back("-n");
+    imageArgsVector_.push_back("-th"); imageArgsVector_.push_back("none");
 
-    imageArgs_ = new char *[imageArgsVector_.size() + 2*imageOptions_.size() + 1];
-    imageArgs_[imageArgsVector_.size() + 2*imageOptions_.size()] = 0;
-    nImageArgs_ = imageArgsVector_.size();
+    imageArgs_ = new char *[imageArgsVector_.size() + 9*2 + 1];
+    imageArgs_[imageArgsVector_.size() + 9*2] = 0;
 
     for (uint8_t i=0;i<imageArgsVector_.size();++i) {
       imageArgs_[i] = strdup(imageArgsVector_.at(i).c_str());
@@ -117,7 +122,7 @@ public:
     readImageOptions();
 
     std::vector<std::string> args;
-    args.push_back("/home/pi/bin/videocapture.py");
+    args.push_back("/home/pi/bin/videocapture.py"); 
     args.push_back(outputClipDir_ + "/clip_XXX_YYYYYYYY.h264 ");
 
     clipArgs_ = new char *[args.size() + 1];
@@ -138,6 +143,15 @@ public:
 
       pid_t child_pid = fork();
       if (child_pid == 0) {
+
+        /*
+        int i = 0;
+        while (previewArgs_[i]!=0) {
+          std::cout << previewArgs_[i] << std::endl;
+          i++;
+        }
+        */
+
         execvp(previewArgs_[0], previewArgs_);
         /* The execvp function returns only if an error occurs.  */
         printf ("an error occurred in execl\n");
@@ -191,12 +205,21 @@ public:
       delayImage_ += milliseconds;
       if (delayImage_>timeoutImage_) {
 
-        sprintf(imageArgs_[nImageArgs_-1],
+        sprintf(imageArgs_[2],
                 "%s/image_%03d_%06d.jpg",
                 outputImageDir_.c_str(), imageLoopCount_, imageCount_++);
 
         pid_t child_pid = fork();
         if (child_pid == 0) {
+
+          /*
+          int i = 0;
+          while (previewArgs_[i]!=0) {
+            std::cout << previewArgs_[i] << std::endl;
+            i++;
+          }
+          */
+
           execvp(imageArgs_[0], imageArgs_);
           /* The execvp function returns only if an error occurs.  */
           printf ("an error occurred in execl\n");
@@ -207,7 +230,8 @@ public:
         }
 
 #ifndef NODEVICE
-        cv::Mat image = cv::imread(imageArgs_[nImageArgs_-1], 1);
+        /*
+        cv::Mat image = cv::imread(imageArgs_[2], 1);
         cv::Mat gray_image;
         cv::cvtColor(image, gray_image, CV_BGR2GRAY);
 
@@ -227,6 +251,7 @@ public:
         }
         sum /= (gray_image.rows*gray_image.cols);
         Log() << "brightness: " << sum;
+        */
 #endif
 
         delayImage_ = 0;
@@ -240,7 +265,7 @@ public:
         struct stat buffer;
         if (stat("/tmp/videocapture.lck", &buffer) != 0) {
 
-          sprintf(clipArgs_[nClipArgs_-1],
+          sprintf(clipArgs_[1],
                   "%s/clip_%03d_%06d.h264",
                   outputClipDir_.c_str(), clipLoopCount_, clipCount_++);
 
@@ -316,38 +341,90 @@ public:
 
   void readImageOptions() {
 
-    std::string key, value;
+    std::string key, aValue;
+    int iValue;
     std::ifstream ifile("/home/pi/www/setup.txt");
-    while (ifile >> key >> value) {
-      std::map<std::string,std::string>::iterator it = imageOptions_.find(key);
-      if (it!=imageOptions_.end()) {
-        it->second = value;
+    while (ifile >> key >> aValue) {
+      iValue = atoi(aValue.c_str());
+      if (key=="iso") {
+	imageOptions_.aISO = aValue;
+        imageOptions_.iISO = iValue;
+      }
+      if (key=="ex") {
+	imageOptions_.aEX = aValue;
+      }
+      if (key=="ss") {
+	imageOptions_.aSS = aValue;
+	imageOptions_.iSS = iValue;
+      }
+      if (key=="mm") {
+	imageOptions_.aMM = aValue;
+      }
+      if (key=="ev") {
+	imageOptions_.aEV = aValue;
+      }
+      if (key=="sh") {
+	imageOptions_.aSH = aValue;
+      }
+      if (key=="co") {
+	imageOptions_.aCO = aValue;
+      }
+      if (key=="br") {
+	imageOptions_.aBR = aValue;
+      }
+      if (key=="sa") {
+	imageOptions_.aSA = aValue;
       }
     }
 
     uint8_t i=previewArgsVector_.size();
-    for (std::map<std::string,std::string>::iterator it = imageOptions_.begin();
-         it!=imageOptions_.end();
-         ++it) {
-      std::string key = std::string("-") + it->first.c_str();
-      previewArgs_[i++] = strdup(key.c_str());
-      previewArgs_[i++] = strdup(it->second.c_str());
+    previewArgs_[i++] = strdup("-ISO");
+    previewArgs_[i++] = strdup(imageOptions_.aISO.c_str());
+    previewArgs_[i++] = strdup("-ex");
+    previewArgs_[i++] = strdup(imageOptions_.aEX.c_str());
+    if (imageOptions_.iSS!=0) {
+      previewArgs_[i++] = strdup("-ss");
+      previewArgs_[i++] = strdup(imageOptions_.aSS.c_str());
     }
+    previewArgs_[i++] = strdup("-mm");
+    previewArgs_[i++] = strdup(imageOptions_.aMM.c_str());
+    previewArgs_[i++] = strdup("-ev");
+    previewArgs_[i++] = strdup(imageOptions_.aEV.c_str());
+    previewArgs_[i++] = strdup("-sh");
+    previewArgs_[i++] = strdup(imageOptions_.aSH.c_str());
+    previewArgs_[i++] = strdup("-co");
+    previewArgs_[i++] = strdup(imageOptions_.aCO.c_str());
+    previewArgs_[i++] = strdup("-br");
+    previewArgs_[i++] = strdup(imageOptions_.aBR.c_str());
+    previewArgs_[i++] = strdup("-sa");
+    previewArgs_[i++] = strdup(imageOptions_.aSA.c_str());
+    previewArgs_[i++] = 0;
 
     i=imageArgsVector_.size();
-    for (std::map<std::string,std::string>::iterator it = imageOptions_.begin();
-         it!=imageOptions_.end();
-         ++it) {
-      std::string key = std::string("-") + it->first.c_str();
-      imageArgs_[i++] = strdup(key.c_str());
-      imageArgs_[i++] = strdup(it->second.c_str());
+    imageArgs_[i++] = strdup("-ISO");
+    imageArgs_[i++] = strdup(imageOptions_.aISO.c_str());
+    imageArgs_[i++] = strdup("-ex");
+    imageArgs_[i++] = strdup(imageOptions_.aEX.c_str());
+    if (imageOptions_.iSS!=0) {
+      imageArgs_[i++] = strdup("-ss");
+      imageArgs_[i++] = strdup(imageOptions_.aSS.c_str());
     }
+    imageArgs_[i++] = strdup("-mm");
+    imageArgs_[i++] = strdup(imageOptions_.aMM.c_str());
+    imageArgs_[i++] = strdup("-ev");
+    imageArgs_[i++] = strdup(imageOptions_.aEV.c_str());
+    imageArgs_[i++] = strdup("-sh");
+    imageArgs_[i++] = strdup(imageOptions_.aSH.c_str());
+    imageArgs_[i++] = strdup("-co");
+    imageArgs_[i++] = strdup(imageOptions_.aCO.c_str());
+    imageArgs_[i++] = strdup("-br");
+    imageArgs_[i++] = strdup(imageOptions_.aBR.c_str());
+    imageArgs_[i++] = strdup("-sa");
+    imageArgs_[i++] = strdup(imageOptions_.aSA.c_str());
+    imageArgs_[i++] = 0;
   }
 
 protected:
-
-  std::map<std::string,std::string> imageOptions_;
-  std::vector<std::string> previewArgsVector_;
 
   void readConfig() {
 
@@ -421,9 +498,11 @@ protected:
   int timeoutImage_;
   int timeoutClip_;
 
+  imageOptions imageOptions_;
+
+  std::vector<std::string> previewArgsVector_;
   char** previewArgs_;
 
-  int nImageArgs_;
   std::vector<std::string> imageArgsVector_;
   char** imageArgs_;
 
@@ -441,8 +520,8 @@ protected:
 
 int main(int argc, char * argv[])
 {
-  //Daemonize("camerabox");
-  //Logger::instance(true);
+  Daemonize("camerabox");
+  Logger::instance(true);
 
   int hw_addr = 0;
   if (argc > 1) {
@@ -455,6 +534,6 @@ int main(int argc, char * argv[])
 
   CameraBox cb(&pf);
 
-  cb.input0Changed(0);
-  //cb.run();
+  //cb.input0Changed(0);
+  cb.run();
 }

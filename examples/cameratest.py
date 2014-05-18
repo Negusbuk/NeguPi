@@ -10,8 +10,8 @@ if len(sys.argv) != 2:
     sys.exit()
 
 basename = sys.argv[1] 
-#basecmd = "raspistill --width 1296 --height 972 --quality 100 --exif testID="
-basecmd = "raspistill --width 648 --height 486 --quality 100 --exif testID="
+#basecmd = "raspistill -w 1296 -h 972 -q 100 -n -th none -t 1 -v -x testID="
+basecmd =  "raspistill -w  648 -h 486 -q 100 -n -th none -t 1 -v -x testID="
 count = 1
 
 def acquirePicture(cmd):

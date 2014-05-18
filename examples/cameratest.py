@@ -21,7 +21,7 @@ def acquirePicture(cmd):
     count = count + 1
     print basecmd + idname + cmd + " --output " + basename + fname
     os.system(basecmd + idname + cmd + " --output " + basename + fname)
-    #os.system("sleep 1")
+    os.system("sleep 2")
 
 acquirePicture("")
 

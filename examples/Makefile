@@ -3,9 +3,9 @@ EXAMPLES= blink \
           timelapse \
           videocapture \
           camerabox \
-	  recognition
+          recognition
 
-INCPATHS=../src
+INCPATHS=../src ./
 LIBPATHS=../src
 
 MACHINE:= $(shell uname -m)
@@ -44,14 +44,14 @@ blink: blink.cc ../src/libNeguPi.a
 statemachine: statemachine.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
-timelapse: timelapse.cc ../src/libNeguPi.a
-	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
+timelapse: timelapse.cc imageoptions.cc ../src/libNeguPi.a
+	g++ -o timelapse.cc imageoptions.cc $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
 videocapture: videocapture.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
-camerabox: camerabox.cc ../src/libNeguPi.a
-	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
+camerabox: camerabox.cc imageoptions.cc ../src/libNeguPi.a
+	g++ -o $@ camerabox.cc imageoptions.cc $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
 recognition: recognition.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)

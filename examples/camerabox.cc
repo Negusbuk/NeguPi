@@ -116,7 +116,7 @@ void CameraBox::input0Changed(uint8_t state)
       /*
         int i = 0;
         while (previewArgs_[i]!=0) {
-          std::cout << previewArgs_[i] << std::endl;
+          std::cout << previewArgs_[i];
           i++;
         }
        */
@@ -184,7 +184,7 @@ void CameraBox::heartBeat(int milliseconds)
         /*
           int i = 0;
           while (imageArgs_[i]!=0) {
-            std::cout << imageArgs_[i] << std::endl;
+            std::cout << imageArgs_[i];
             i++;
           }
          */
@@ -369,12 +369,12 @@ void CameraBox::readConfig()
     cfg.readFile(cfgFile.c_str());
   }
   catch (const FileIOException &fioex) {
-    std::cerr << "NeguPi: I/O error while reading config file " << cfgFile << std::endl;
+    Log() << "NeguPi: I/O error while reading config file " << cfgFile;
     writeCfg = true;
   }
   catch (const ParseException &pex) {
-    std::cerr << "Parse error at " << pex.getFile() << ":" << pex.getLine()
-              << " - " << pex.getError() << std::endl;
+    Log() << "Parse error at " << pex.getFile() << ":" << pex.getLine()
+          << " - " << pex.getError();
     writeCfg = true;
   }
   catch (...) {
@@ -415,10 +415,10 @@ void CameraBox::readConfig()
   if (writeCfg) {
     try {
       cfg.writeFile(cfgFile.c_str());
-      std::cerr << "NeguPi: configuration successfully written to " << cfgFile << std::endl;
+      Log() << "NeguPi: configuration successfully written to " << cfgFile;
     }
     catch (const FileIOException &fioex) {
-      std::cerr << "NeguPi: I/O error while writing config file " << cfgFile << std::endl;
+      Log() << "NeguPi: I/O error while writing config file " << cfgFile;
     }
     catch (...) {
 

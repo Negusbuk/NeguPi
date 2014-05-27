@@ -45,10 +45,10 @@ statemachine: statemachine.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
 timelapse: timelapse.cc imageoptions.cc ../src/libNeguPi.a
-	g++ -o timelapse.cc imageoptions.cc $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
+	g++ -o $@ timelapse.cc imageoptions.cc $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
-videocapture: videocapture.cc ../src/libNeguPi.a
-	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
+videocapture: videocapture.cc imageoptions.cc ../src/libNeguPi.a
+	g++ -o $@ videocapture.cc imageoptions.cc $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
 camerabox: camerabox.cc imageoptions.cc ../src/libNeguPi.a
 	g++ -o $@ camerabox.cc imageoptions.cc $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)

@@ -18,13 +18,67 @@
  **
  ****************************************************************************/
 
+#include <iostream>
 #include <fstream>
 #include <cstdlib>
 
+#include <libconfig.h++>
+
+#include <NeguPiLogger.h>
+
 #include "imageoptions.h"
+
+using namespace libconfig;
+using namespace NeguPi;
 
 imageOptions::imageOptions()
 {
+  bool writeCfg = false;
+  std::string homePath = getenv("HOME");
+  std::string cfgFile = homePath + "/.NeguPi.cfg";
+  Config cfg;
+  try {
+    cfg.readFile(cfgFile.c_str());
+  }
+  catch (const FileIOException &fioex) {
+    Log() << "NeguPi: I/O error while reading config file " << cfgFile;
+    writeCfg = true;
+  }
+  catch (const ParseException &pex) {
+    Log() << "Parse error at " << pex.getFile() << ":" << pex.getLine()
+                      << " - " << pex.getError();
+    writeCfg = true;
+  }
+  catch (...) {
+    writeCfg = true;
+  }
+
+  Setting &root = cfg.getRoot();
+  if (!root.exists("imageoptions")) {
+    root.add("imageoptions", Setting::TypeGroup);
+    writeCfg = true;
+  }
+  Setting &settings = root["imageoptions"];
+
+  if (!settings.lookupValue("imageDir", filename_)) {
+    filename_ = homePath + "/www/setup.txt";
+    settings.add("imageDir", Setting::TypeString) = filename_.c_str();
+    writeCfg = true;
+  }
+
+  if (writeCfg) {
+    try {
+      cfg.writeFile(cfgFile.c_str());
+      Log() << "NeguPi: configuration successfully written to " << cfgFile;
+    }
+    catch (const FileIOException &fioex) {
+      Log() << "NeguPi: I/O error while writing config file " << cfgFile;
+    }
+    catch (...) {
+
+    }
+  }
+
   aISO = "0";
   iISO = 0;
   aEX = "antishake";
@@ -42,7 +96,7 @@ void imageOptions::read()
 {
   std::string key, aValue;
   int iValue;
-  std::ifstream ifile("/home/pi/www/setup.txt");
+  std::ifstream ifile(filename_);
   while (ifile >> key >> aValue) {
     iValue = std::atoi(aValue.c_str());
     if (key=="iso") {

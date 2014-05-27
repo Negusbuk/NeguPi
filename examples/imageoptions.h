@@ -28,6 +28,8 @@ public:
   
   void read();
 
+  std::string filename_;
+
   std::string aISO;
   int iISO;
   std::string aEX;

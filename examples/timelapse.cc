@@ -312,4 +312,5 @@ int main(int argc, char * argv[])
   TimeLapse tl(&pf);
 
   tl.run();
+  //tl.input0Changed(0);
 }

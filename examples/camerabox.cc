@@ -443,6 +443,6 @@ int main(int argc, char * argv[])
 
   CameraBox cb(&pf);
 
-  //cb.input0Changed(0);
   cb.run();
+  //cb.input0Changed(0);
 }

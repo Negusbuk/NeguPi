@@ -25,7 +25,7 @@ DESC="NeguPi CameraBox"
 case "$1" in
   start)
 	log_daemon_msg "Starting $DESC" "$NAME"
-       	start-stop-daemon --start --oknodo --quiet --user pi --exec "$DAEMON_SBIN" >/dev/null
+       	start-stop-daemon --start --oknodo --quiet --user pi -c pi --exec "$DAEMON_SBIN" >/dev/null
 	log_end_msg "$?"
 	;;
   stop)

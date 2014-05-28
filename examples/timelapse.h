@@ -18,27 +18,12 @@
  **
  ****************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-
-#include <iostream>
-#include <vector>
 #include <string>
-#include <thread>
-#include <chrono>
+#include <vector>
 
-#include <libconfig.h++>
-
-#include <NeguPiDaemon.h>
-#include <NeguPiLogger.h>
-
-#include <PiFace.h>
 #include <PiFaceStateMachine.h>
+
+#include <imageoptions.h>
 
 class TimeLapse : public NeguPi::PiFaceStateMachine
 {
@@ -53,14 +38,20 @@ public:
 protected:
 
   void checkOutputDirectory();
+  void readImageOptions();
   void readConfig();
 
   std::string outputDir_;
   int timeout_;
 
+  imageOptions imageOptions_;
+
+  std::vector<std::string> previewArgsVector_;
   char** previewArgs_;
-  int nImageArgs_;
+
+  std::vector<std::string> imageArgsVector_;
   char** imageArgs_;
+
   bool inTimeLapse_;
   int delay_;
   int imageLoopCount_;

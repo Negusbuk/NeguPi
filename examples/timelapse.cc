@@ -52,40 +52,37 @@ TimeLapse::TimeLapse(PiFace* piface)
 
   readConfig();
 
-  std::vector<std::string> args;
-  args.push_back("raspistill");
-  args.push_back("--width"); args.push_back("960");
-  args.push_back("--height"); args.push_back("540");
-  args.push_back("--timeout"); args.push_back("1");
-  args.push_back("--output"); args.push_back("/home/pi/www/preview.jpg");
+  previewArgsVector_.push_back("raspistill");
+  previewArgsVector_.push_back("-w"); previewArgsVector_.push_back("960");
+  previewArgsVector_.push_back("-h"); previewArgsVector_.push_back("540");
+  previewArgsVector_.push_back("-t"); previewArgsVector_.push_back("1");
+  previewArgsVector_.push_back("-n"); previewArgsVector_.push_back("-n");
+  previewArgsVector_.push_back("-th"); previewArgsVector_.push_back("none");
+  previewArgsVector_.push_back("-o"); previewArgsVector_.push_back("/home/pi/www/preview.jpg");
 
-  previewArgs_ = new char *[args.size() + 1];
-  previewArgs_[args.size()] = 0;
+  previewArgs_ = new char *[previewArgsVector_.size() + imageOptions::numberOfOptions()*2 + 1];
+  previewArgs_[previewArgsVector_.size() + imageOptions::numberOfOptions()*2] = 0;
 
-  for (uint8_t i=0;i<args.size();++i) {
-    previewArgs_[i] = strdup(args.at(i).c_str());
+  for (uint8_t i=0;i<previewArgsVector_.size();++i) {
+    previewArgs_[i] = strdup(previewArgsVector_.at(i).c_str());
   }
 
-  args.clear();
-  args.push_back("raspistill");
-  args.push_back("--width"); args.push_back("960");
-  args.push_back("--height"); args.push_back("540");
-  args.push_back("--timeout"); args.push_back("1");
-  args.push_back("--output"); args.push_back(outputDir_ + "/image_XXX_YYYYYYYY.jpg ");
+  imageArgsVector_.push_back("raspistill");
+  imageArgsVector_.push_back("-o"); imageArgsVector_.push_back(outputDir_ + "/image_XXX_YYYYYYYY.jpg ");
+  imageArgsVector_.push_back("-w"); imageArgsVector_.push_back("1280");
+  imageArgsVector_.push_back("-h"); imageArgsVector_.push_back("720");
+  imageArgsVector_.push_back("-t"); imageArgsVector_.push_back("1");
+  imageArgsVector_.push_back("-n"); imageArgsVector_.push_back("-n");
+  imageArgsVector_.push_back("-th"); imageArgsVector_.push_back("none");
 
-  /*
-    args.push_back("touch");
-    args.push_back(outputDir_ + "/image_XXX_YYYYYYYY.jpg ");
-   */
+  imageArgs_ = new char *[imageArgsVector_.size() + imageOptions::numberOfOptions()*2 + 1];
+  imageArgs_[imageArgsVector_.size() + imageOptions::numberOfOptions()*2] = 0;
 
-  imageArgs_ = new char *[args.size() + 1];
-  imageArgs_[args.size()] = 0;
-  nImageArgs_ = args.size();
-
-  for (uint8_t i=0;i<args.size();++i) {
-    imageArgs_[i] = strdup(args.at(i).c_str());
+  for (uint8_t i=0;i<imageArgsVector_.size();++i) {
+    imageArgs_[i] = strdup(imageArgsVector_.at(i).c_str());
   }
 
+  readImageOptions();
 }
 
 void TimeLapse::input0Changed(uint8_t state)
@@ -94,11 +91,22 @@ void TimeLapse::input0Changed(uint8_t state)
   if (state==0) {
     Log() << "take new preview picture";
 
+    readImageOptions();
+
     pid_t child_pid = fork();
     if (child_pid == 0) {
+
+      std::ostringstream oss;
+      int i = 0;
+      while (previewArgs_[i]!=0) {
+	oss << previewArgs_[i] << " ";
+	i++;
+      }
+      Log() << oss.str();
+
       execvp(previewArgs_[0], previewArgs_);
       /* The execvp function returns only if an error occurs.  */
-      printf ("an error occurred in execl\n");
+      Log() << "an error occurred in execvp";
       abort();
     }
   }
@@ -126,17 +134,25 @@ void TimeLapse::heartBeat(int milliseconds)
   if (inTimeLapse_) {
     delay_ += milliseconds;
     if (delay_>timeout_) {
-      // Log() << "beat " << delay_;
 
-      sprintf(imageArgs_[nImageArgs_-1],
+      sprintf(imageArgs_[2],
               "%s/image_%03d_%06d.jpg",
               outputDir_.c_str(), imageLoopCount_, imageCount_++);
 
       pid_t child_pid = fork();
       if (child_pid == 0) {
+	
+	std::ostringstream oss;
+	int i = 0;
+	while (imageArgs_[i]!=0) {
+	  oss << imageArgs_[i] << " ";
+	  i++;
+	}
+	Log() << oss.str();
+
         execvp(imageArgs_[0], imageArgs_);
         /* The execvp function returns only if an error occurs.  */
-        printf ("an error occurred in execl\n");
+        Log() << "an error occurred in execvp";
         abort();
       }
 
@@ -173,9 +189,59 @@ void TimeLapse::checkOutputDirectory()
   closedir( dp );
 }
 
+void TimeLapse::readImageOptions()
+{
+  imageOptions_.read();
+
+  uint8_t i = previewArgsVector_.size();
+  previewArgs_[i++] = strdup("-ISO");
+  previewArgs_[i++] = strdup(imageOptions_.aISO.c_str());
+  previewArgs_[i++] = strdup("-ex");
+  previewArgs_[i++] = strdup(imageOptions_.aEX.c_str());
+  if (imageOptions_.iSS!=0) {
+    previewArgs_[i++] = strdup("-ss");
+    previewArgs_[i++] = strdup(imageOptions_.aSS.c_str());
+  }
+  previewArgs_[i++] = strdup("-mm");
+  previewArgs_[i++] = strdup(imageOptions_.aMM.c_str());
+  previewArgs_[i++] = strdup("-ev");
+  previewArgs_[i++] = strdup(imageOptions_.aEV.c_str());
+  previewArgs_[i++] = strdup("-sh");
+  previewArgs_[i++] = strdup(imageOptions_.aSH.c_str());
+  previewArgs_[i++] = strdup("-co");
+  previewArgs_[i++] = strdup(imageOptions_.aCO.c_str());
+  previewArgs_[i++] = strdup("-br");
+  previewArgs_[i++] = strdup(imageOptions_.aBR.c_str());
+  previewArgs_[i++] = strdup("-sa");
+  previewArgs_[i++] = strdup(imageOptions_.aSA.c_str());
+  previewArgs_[i++] = 0;
+
+  i = imageArgsVector_.size();
+  imageArgs_[i++] = strdup("-ISO");
+  imageArgs_[i++] = strdup(imageOptions_.aISO.c_str());
+  imageArgs_[i++] = strdup("-ex");
+  imageArgs_[i++] = strdup(imageOptions_.aEX.c_str());
+  if (imageOptions_.iSS!=0) {
+    imageArgs_[i++] = strdup("-ss");
+    imageArgs_[i++] = strdup(imageOptions_.aSS.c_str());
+  }
+  imageArgs_[i++] = strdup("-mm");
+  imageArgs_[i++] = strdup(imageOptions_.aMM.c_str());
+  imageArgs_[i++] = strdup("-ev");
+  imageArgs_[i++] = strdup(imageOptions_.aEV.c_str());
+  imageArgs_[i++] = strdup("-sh");
+  imageArgs_[i++] = strdup(imageOptions_.aSH.c_str());
+  imageArgs_[i++] = strdup("-co");
+  imageArgs_[i++] = strdup(imageOptions_.aCO.c_str());
+  imageArgs_[i++] = strdup("-br");
+  imageArgs_[i++] = strdup(imageOptions_.aBR.c_str());
+  imageArgs_[i++] = strdup("-sa");
+  imageArgs_[i++] = strdup(imageOptions_.aSA.c_str());
+  imageArgs_[i++] = 0;
+}
+
 void TimeLapse::readConfig()
 {
-
   bool writeCfg = false;
   std::string homePath = getenv("HOME");
   std::string cfgFile = homePath + "/.NeguPi.cfg";

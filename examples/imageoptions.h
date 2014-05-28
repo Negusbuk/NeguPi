@@ -26,6 +26,7 @@ public:
 
   imageOptions();
   
+  static uint8_t numberOfOptions() { return 9; }
   void read();
 
   std::string filename_;

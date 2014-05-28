@@ -32,6 +32,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <sstream>
 #include <thread>
 #include <chrono>
 
@@ -66,8 +67,8 @@ CameraBox::CameraBox(PiFace* piface)
   previewArgsVector_.push_back("-th"); previewArgsVector_.push_back("none");
   previewArgsVector_.push_back("-o"); previewArgsVector_.push_back("/home/pi/www/preview.jpg");
 
-  previewArgs_ = new char *[previewArgsVector_.size() + 9*2 + 1];
-  previewArgs_[previewArgsVector_.size() + 9*2] = 0;
+  previewArgs_ = new char *[previewArgsVector_.size() + imageOptions::numberOfOptions()*2 + 1];
+  previewArgs_[previewArgsVector_.size() + imageOptions::numberOfOptions()*2] = 0;
 
   for (uint8_t i=0;i<previewArgsVector_.size();++i) {
     previewArgs_[i] = strdup(previewArgsVector_.at(i).c_str());
@@ -81,8 +82,8 @@ CameraBox::CameraBox(PiFace* piface)
   imageArgsVector_.push_back("-n"); imageArgsVector_.push_back("-n");
   imageArgsVector_.push_back("-th"); imageArgsVector_.push_back("none");
 
-  imageArgs_ = new char *[imageArgsVector_.size() + 9*2 + 1];
-  imageArgs_[imageArgsVector_.size() + 9*2] = 0;
+  imageArgs_ = new char *[imageArgsVector_.size() + imageOptions::numberOfOptions()*2 + 1];
+  imageArgs_[imageArgsVector_.size() + imageOptions::numberOfOptions()*2] = 0;
 
   for (uint8_t i=0;i<imageArgsVector_.size();++i) {
     imageArgs_[i] = strdup(imageArgsVector_.at(i).c_str());
@@ -113,17 +114,17 @@ void CameraBox::input0Changed(uint8_t state)
     pid_t child_pid = fork();
     if (child_pid == 0) {
 
-      /*
-        int i = 0;
-        while (previewArgs_[i]!=0) {
-          std::cout << previewArgs_[i];
-          i++;
-        }
-       */
+      std::ostringstream oss;
+      int i = 0;
+      while (previewArgs_[i]!=0) {
+	oss << previewArgs_[i] << " ";
+	i++;
+      }
+      Log() << oss.str();
 
       execvp(previewArgs_[0], previewArgs_);
       /* The execvp function returns only if an error occurs.  */
-      printf ("an error occurred in execl\n");
+      Log() << "an error occurred in execvp";
       abort();
     }
   }
@@ -173,25 +174,25 @@ void CameraBox::heartBeat(int milliseconds)
   if (inImageLoop_) {
     delayImage_ += milliseconds;
     if (delayImage_>timeoutImage_) {
-
+      
       sprintf(imageArgs_[2],
               "%s/image_%03d_%06d.jpg",
               outputImageDir_.c_str(), imageLoopCount_, imageCount_++);
 
       pid_t child_pid = fork();
       if (child_pid == 0) {
-
-        /*
-          int i = 0;
-          while (imageArgs_[i]!=0) {
-            std::cout << imageArgs_[i];
-            i++;
-          }
-         */
+	
+	std::ostringstream oss;
+	int i = 0;
+	while (imageArgs_[i]!=0) {
+	  oss << imageArgs_[i] << " ";
+	  i++;
+	}
+	Log() << oss.str();
 
         execvp(imageArgs_[0], imageArgs_);
         /* The execvp function returns only if an error occurs.  */
-        printf ("an error occurred in execl\n");
+        Log() << "an error occurred in execvp";
         abort();
       } else if (child_pid > 0) {
         int status;

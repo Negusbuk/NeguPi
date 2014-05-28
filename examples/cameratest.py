@@ -10,8 +10,8 @@ if len(sys.argv) != 2:
     sys.exit()
 
 basename = sys.argv[1] 
-#basecmd = "raspistill --width 1296 --height 972 --quality 100 --exif testID="
-basecmd = "raspistill --width 648 --height 486 --quality 100 --exif testID="
+#basecmd = "raspistill -w 1296 -h 972 -q 100 -n -th none -t 1 -v -x testID="
+basecmd =  "raspistill -w  648 -h 486 -q 100 -n -th none -t 1 -v -x testID="
 count = 1
 
 def acquirePicture(cmd):
@@ -21,30 +21,24 @@ def acquirePicture(cmd):
     count = count + 1
     print basecmd + idname + cmd + " --output " + basename + fname
     os.system(basecmd + idname + cmd + " --output " + basename + fname)
-    #os.system("sleep 1")
+    os.system("sleep 2")
 
 acquirePicture("")
 
-acquirePicture("-awb off --ISO 0")
-acquirePicture("-awb off --ISO 100")
-acquirePicture("-awb off --ISO 200")
-acquirePicture("-awb off --ISO 400")
-acquirePicture("-awb off --ISO 800")
+acquirePicture("-awb off -ISO   0")
+acquirePicture("-awb off -ISO 100")
+acquirePicture("-awb off -ISO 200")
+acquirePicture("-awb off -ISO 400")
+acquirePicture("-awb off -ISO 800")
 
-acquirePicture("-awb off --ISO 0 --exposure fixedfps")
-acquirePicture("-awb off --ISO 100 --exposure fixedfps")
-acquirePicture("-awb off --ISO 200 --exposure fixedfps")
-acquirePicture("-awb off --ISO 400 --exposure fixedfps")
-acquirePicture("-awb off --ISO 800 --exposure fixedfps")
-
-acquirePicture("-awb off --ISO 100 --exposure fixedfps --ev -10")
-acquirePicture("-awb off --ISO 100 --exposure fixedfps --ev -8")
-acquirePicture("-awb off --ISO 100 --exposure fixedfps --ev -6")
-acquirePicture("-awb off --ISO 100 --exposure fixedfps --ev -4")
-acquirePicture("-awb off --ISO 100 --exposure fixedfps --ev -2")
-acquirePicture("-awb off --ISO 100 --exposure fixedfps --ev -0")
-acquirePicture("-awb off --ISO 100 --exposure fixedfps --ev 2")
-acquirePicture("-awb off --ISO 100 --exposure fixedfps --ev 4")
-acquirePicture("-awb off --ISO 100 --exposure fixedfps --ev 6")
-acquirePicture("-awb off --ISO 100 --exposure fixedfps --ev 8")
-acquirePicture("-awb off --ISO 100 --exposure fixedfps --ev 10")
+acquirePicture("-awb off -ISO 100 -ev -10")
+acquirePicture("-awb off -ISO 100 -ev  -8")
+acquirePicture("-awb off -ISO 100 -ev  -6")
+acquirePicture("-awb off -ISO 100 -ev  -4")
+acquirePicture("-awb off -ISO 100 -ev  -2")
+acquirePicture("-awb off -ISO 100 -ev  -0")
+acquirePicture("-awb off -ISO 100 -ev   2")
+acquirePicture("-awb off -ISO 100 -ev   4")
+acquirePicture("-awb off -ISO 100 -ev   6")
+acquirePicture("-awb off -ISO 100 -ev   8")
+acquirePicture("-awb off -ISO 100 -ev  10")

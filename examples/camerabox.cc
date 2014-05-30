@@ -62,7 +62,7 @@ CameraBox::CameraBox(PiFace* piface)
   previewArgsVector_.push_back("raspistill");
   previewArgsVector_.push_back("-w"); previewArgsVector_.push_back("960");
   previewArgsVector_.push_back("-h"); previewArgsVector_.push_back("540");
-  previewArgsVector_.push_back("-t"); previewArgsVector_.push_back("1");
+  previewArgsVector_.push_back("-t"); previewArgsVector_.push_back("500");
   previewArgsVector_.push_back("-n"); previewArgsVector_.push_back("-n");
   previewArgsVector_.push_back("-th"); previewArgsVector_.push_back("none");
   previewArgsVector_.push_back("-o"); previewArgsVector_.push_back("/home/pi/www/preview.jpg");
@@ -78,7 +78,7 @@ CameraBox::CameraBox(PiFace* piface)
   imageArgsVector_.push_back("-o"); imageArgsVector_.push_back(outputImageDir_ + "/image_XXX_YYYYYYYY.jpg ");
   imageArgsVector_.push_back("-w"); imageArgsVector_.push_back("1280");
   imageArgsVector_.push_back("-h"); imageArgsVector_.push_back("720");
-  imageArgsVector_.push_back("-t"); imageArgsVector_.push_back("1");
+  imageArgsVector_.push_back("-t"); imageArgsVector_.push_back("500");
   imageArgsVector_.push_back("-n"); imageArgsVector_.push_back("-n");
   imageArgsVector_.push_back("-th"); imageArgsVector_.push_back("none");
 

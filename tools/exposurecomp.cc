@@ -88,7 +88,7 @@ int main(int argc, char * argv[])
     std::cout << i << std::endl;
     imageInfo.push_back(std::make_tuple(i++, filename, brightness, true));
 
-    //if (i==60) break;
+    if (i==60) break;
   }
 
   std::vector<imageInfo_t>::iterator it = imageInfo.begin();
@@ -117,7 +117,7 @@ int main(int argc, char * argv[])
 
     double value = std::get<2>(info);
     double delta = mean-value;
-    if (std::fabs(delta)>1.5) {
+    if (std::fabs(delta)>2.5) {
       std::get<3>(info) = false;
       std::cout << std::get<1>(info) << "\t" << value << "\t" << delta << std::endl;
 
@@ -169,13 +169,15 @@ int main(int argc, char * argv[])
       delta = bn - b;
       //std::cout << bn << "\t" << b << std::endl;
 
-      cv::Mat image_new = images[1] + cv::Scalar(delta, delta, delta);
+      cv::Mat image_new;
+      cv::cvtColor(images[1], image_new, CV_BGR2HSV);
+      image_new += cv::Scalar(0, 0, delta);
+      cv::cvtColor(image_new, images[1], CV_HSV2BGR);
       //image.convertTo(image_new, -1, mean/value, 0);
 
       //std::cout << getBrightness(image) << "\t" << getBrightness(image_new) << std::endl;
 
-
-      cv::imwrite(std::get<1>(info).c_str(), image_new);
+      cv::imwrite(std::get<1>(info), images[1]);
     }
   }
   return 0;

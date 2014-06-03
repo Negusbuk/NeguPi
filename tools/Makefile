@@ -8,9 +8,7 @@ NODEVICE=0
 ifneq "$(MACHINE)" "armv6l"
 	NODEVICE=1
 	INCPATHS+=/opt/local/include /opt/local/include/opencv /opt/local/include/opencv2
-	LDFLAGS=-L/opt/local/lib -lconfig++ -lopencv_core -lopencv_imgproc -lopencv_highgui
-	LDFLAGS+=-lopencv_ml -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_objdetect
-	LDFLAGS+=-lopencv_stitching -lopencv_contrib -lopencv_legacy -lopencv_flann
+	LDFLAGS=-L/opt/local/lib -lconfig++
 else
 	LDFLAGS=-lconfig++
 endif
@@ -22,9 +20,10 @@ CPP=g++
 ifeq "$(NODEVICE)" "1"
 CPPFLAGS+= -DNODEVICE
 else
-CPPFLAGS+= $(shell pkg-config --cflags opencv)
-LDFLAGS+= $(shell pkg-config --libs opencv)
+CPPFLAGS+= $(shell pkg-config --cflags opencv) -I/usr/local/include/opencv2
 endif
+
+LDFLAGS+= $(shell pkg-config --libs opencv)
 
 # ------------ MAGIC BEGINS HERE -------------
 

@@ -76,9 +76,9 @@ CameraBox::CameraBox(PiFace* piface)
 
   imageArgsVector_.push_back("raspistill");
   imageArgsVector_.push_back("-o"); imageArgsVector_.push_back(outputImageDir_ + "/image_XXX_YYYYYYYY.jpg ");
-  imageArgsVector_.push_back("-w"); imageArgsVector_.push_back("960");
-  imageArgsVector_.push_back("-h"); imageArgsVector_.push_back("540");
-  imageArgsVector_.push_back("-t"); imageArgsVector_.push_back("501");
+  imageArgsVector_.push_back("-w"); imageArgsVector_.push_back("1280");
+  imageArgsVector_.push_back("-h"); imageArgsVector_.push_back("720");
+  imageArgsVector_.push_back("-t"); imageArgsVector_.push_back("500");
   imageArgsVector_.push_back("-n"); imageArgsVector_.push_back("-n");
   imageArgsVector_.push_back("-th"); imageArgsVector_.push_back("none");
 

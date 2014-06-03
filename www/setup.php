@@ -135,39 +135,91 @@ echo '  <select name="ss" size="1" style="width:160px;">';
 echo '    <option ';
 If ($ss=="0") echo 'selected ';
 echo 'value="0">auto</option>';
+
+echo '    <option ';
+If ($ss=="500") echo 'selected ';
+echo 'value="500">1/2000 s</option>';
+
+echo '    <option ';
+If ($ss=="666") echo 'selected ';
+echo 'value="666">1/1500 s</option>';
+
+echo '    <option ';
+If ($ss=="800") echo 'selected ';
+echo 'value="800">1/1250 s</option>';
+
+echo '    <option ';
+If ($ss=="909") echo 'selected ';
+echo 'value="909">1/1100 s</option>';
+
+echo '    <option ';
+If ($ss=="1000") echo 'selected ';
+echo 'value="1000">1/1000 s</option>';
+
+echo '    <option ';
+If ($ss=="1333") echo 'selected ';
+echo 'value="1333">1/750 s</option>';
+
 echo '    <option ';
 If ($ss=="2000") echo 'selected ';
 echo 'value="2000">1/500 s</option>';
+
 echo '    <option ';
 If ($ss=="2500") echo 'selected ';
 echo 'value="2500">1/400 s</option>';
+
+echo '    <option ';
+If ($ss=="4000") echo 'selected ';
+echo 'value="4000">1/250 s</option>';
+
 echo '    <option ';
 If ($ss=="5000") echo 'selected ';
 echo 'value="5000">1/200 s</option>';
+
+echo '    <option ';
+If ($ss=="8000") echo 'selected ';
+echo 'value="8000">1/125 s</option>';
+
 echo '    <option ';
 If ($ss=="10000") echo 'selected ';
 echo 'value="10000">1/100 s</option>';
+
+echo '    <option ';
+If ($ss=="16666") echo 'selected ';
+echo 'value="16666">1/60 s</option>';
+
 echo '    <option ';
 If ($ss=="20000") echo 'selected ';
 echo 'value="20000">1/50 s</option>';
+
 echo '    <option ';
-If ($ss=="25000") echo 'selected ';
-echo 'value="25000">1/40 s</option>';
-echo '    <option ';
-If ($ss=="50000") echo 'selected ';
-echo 'value="50000">1/20 s</option>';
+If ($ss=="33333") echo 'selected ';
+echo 'value="33333">1/30 s</option>';
+
 echo '    <option ';
 If ($ss=="40000") echo 'selected ';
 echo 'value="40000">1/25 s</option>';
+
+echo '    <option ';
+If ($ss=="66666") echo 'selected ';
+echo 'value="66666">1/15 s</option>';
+
 echo '    <option ';
 If ($ss=="100000") echo 'selected ';
 echo 'value="100000">1/10 s</option>';
+
 echo '    <option ';
-If ($ss=="200000") echo 'selected ';
-echo 'value="200000">1/5 s</option>';
+If ($ss=="125000") echo 'selected ';
+echo 'value="125000">1/8 s</option>';
+
+echo '    <option ';
+If ($ss=="250000") echo 'selected ';
+echo 'value="250000">1/4 s</option>';
+
 echo '    <option ';
 If ($ss=="330000") echo 'selected ';
 echo 'value="330000">1/3 s</option>';
+
 echo '  </select>';
 
 echo '  <select name="mm" size="1" style="width:160px;">';

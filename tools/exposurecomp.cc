@@ -88,7 +88,7 @@ int main(int argc, char * argv[])
     std::cout << i << std::endl;
     imageInfo.push_back(std::make_tuple(i++, filename, brightness, true));
 
-    if (i==60) break;
+    //if (i==60) break;
   }
 
   std::vector<imageInfo_t>::iterator it = imageInfo.begin();

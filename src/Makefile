@@ -52,4 +52,6 @@ distclean: clean
 
 clean:
 	rm -f $(OBJECTS)
+	rm -f libNeguPi.a
+	rm -f *~
 	

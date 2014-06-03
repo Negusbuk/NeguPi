@@ -13,7 +13,7 @@ NODEVICE=0
 ifneq "$(MACHINE)" "armv6l"
 	NODEVICE=1
 	INCPATHS+=/opt/local/include /opt/local/include/opencv /opt/local/include/opencv2
-	LDFLAGS=-L/opt/local/lib -lconfig++ -lopencv_core -lopencv_highgui
+	LDFLAGS=-L/opt/local/lib -lconfig++
 else
 	LDFLAGS=-lconfig++
 endif
@@ -26,8 +26,9 @@ ifeq "$(NODEVICE)" "1"
 CPPFLAGS+= -DNODEVICE
 else
 CPPFLAGS+= $(shell pkg-config --cflags opencv)
-LDFLAGS+= $(shell pkg-config --libs opencv)
 endif
+
+LDFLAGS+= $(shell pkg-config --libs opencv)
 
 # ------------ MAGIC BEGINS HERE -------------
 
@@ -44,18 +45,18 @@ blink: blink.cc ../src/libNeguPi.a
 statemachine: statemachine.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
-timelapse: timelapse.cc imageoptions.cc ../src/libNeguPi.a
+timelapse: timelapse.cc imageoptions.cc imageoptions.h ../src/libNeguPi.a
 	g++ -o $@ timelapse.cc imageoptions.cc $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
-videocapture: videocapture.cc imageoptions.cc ../src/libNeguPi.a
+videocapture: videocapture.cc imageoptions.cc imageoptions.h ../src/libNeguPi.a
 	g++ -o $@ videocapture.cc imageoptions.cc $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
-camerabox: camerabox.cc imageoptions.cc ../src/libNeguPi.a
+camerabox: camerabox.cc camerabox.h imageoptions.cc imageoptions.h ../src/libNeguPi.a
 	g++ -o $@ camerabox.cc imageoptions.cc $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
 
 recognition: recognition.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
-	
+
 distclean: clean
 	rm -fr ../bin
 

@@ -62,7 +62,7 @@ CameraBox::CameraBox(PiFace* piface)
   previewArgsVector_.push_back("raspistill");
   previewArgsVector_.push_back("-w"); previewArgsVector_.push_back("960");
   previewArgsVector_.push_back("-h"); previewArgsVector_.push_back("540");
-  previewArgsVector_.push_back("-t"); previewArgsVector_.push_back("1");
+  previewArgsVector_.push_back("-t"); previewArgsVector_.push_back("501");
   previewArgsVector_.push_back("-n"); previewArgsVector_.push_back("-n");
   previewArgsVector_.push_back("-th"); previewArgsVector_.push_back("none");
   previewArgsVector_.push_back("-o"); previewArgsVector_.push_back("/home/pi/www/preview.jpg");
@@ -76,9 +76,9 @@ CameraBox::CameraBox(PiFace* piface)
 
   imageArgsVector_.push_back("raspistill");
   imageArgsVector_.push_back("-o"); imageArgsVector_.push_back(outputImageDir_ + "/image_XXX_YYYYYYYY.jpg ");
-  imageArgsVector_.push_back("-w"); imageArgsVector_.push_back("1280");
-  imageArgsVector_.push_back("-h"); imageArgsVector_.push_back("720");
-  imageArgsVector_.push_back("-t"); imageArgsVector_.push_back("1");
+  imageArgsVector_.push_back("-w"); imageArgsVector_.push_back("960");
+  imageArgsVector_.push_back("-h"); imageArgsVector_.push_back("540");
+  imageArgsVector_.push_back("-t"); imageArgsVector_.push_back("501");
   imageArgsVector_.push_back("-n"); imageArgsVector_.push_back("-n");
   imageArgsVector_.push_back("-th"); imageArgsVector_.push_back("none");
 
@@ -181,14 +181,14 @@ void CameraBox::heartBeat(int milliseconds)
 
       pid_t child_pid = fork();
       if (child_pid == 0) {
-	
-	std::ostringstream oss;
-	int i = 0;
-	while (imageArgs_[i]!=0) {
-	  oss << imageArgs_[i] << " ";
-	  i++;
-	}
-	Log() << oss.str();
+
+        std::ostringstream oss;
+        int i = 0;
+        while (imageArgs_[i]!=0) {
+          oss << imageArgs_[i] << " ";
+          i++;
+        }
+        Log() << oss.str();
 
         execvp(imageArgs_[0], imageArgs_);
         /* The execvp function returns only if an error occurs.  */
@@ -197,32 +197,13 @@ void CameraBox::heartBeat(int milliseconds)
       } else if (child_pid > 0) {
         int status;
         waitpid(child_pid, &status, 0);
-      }
 
-#ifndef NODEVICE
-      /*
         cv::Mat image = cv::imread(imageArgs_[2], 1);
-        cv::Mat gray_image;
-        cv::cvtColor(image, gray_image, CV_BGR2GRAY);
+        double brightness = getBrightness(image);
+        Log() << "brightness: " << brightness;
 
-        int bins = 256;
-        int histSize[] = { bins };
-        // Set ranges for histogram bins
-        float lranges[] = { 0, 256 };
-        const float* ranges[] = { lranges };
-        // create matrix for histogram
-        cv::Mat hist;
-        int channels[] = { 0 };
-        float sum = 0;
-
-        cv::calcHist(&gray_image, 1, channels, cv::Mat(), hist, 1, histSize, ranges, true, false);
-        for (int b = 0;b<bins;b++) {
-          sum += hist.at<float>(b);
-        }
-        sum /= (gray_image.rows*gray_image.cols);
-        Log() << "brightness: " << sum;
-       */
-#endif
+        brightness_.add(brightness);
+      }
 
       delayImage_ = 0;
     }
@@ -425,6 +406,30 @@ void CameraBox::readConfig()
 
     }
   }
+}
+
+double CameraBox::getBrightness(const cv::Mat& image)
+{
+  cv::Mat hsv_image;
+  cv::cvtColor(image, hsv_image, CV_BGR2HSV);
+
+  int bins = 256;
+  int histSize[] = { bins };
+  // Set ranges for histogram bins
+  float lranges[] = { 0, 256 };
+  const float* ranges[] = { lranges };
+  // create matrix for histogram
+  cv::Mat hist;
+  int channels[] = { 2 };
+  double sum = hsv_image.rows * hsv_image.cols;
+  double mean = 0;
+
+  cv::calcHist(&hsv_image, 1, channels, cv::Mat(), hist, 1, histSize, ranges, true, false);
+  for (int b = 0;b<bins;b++) {
+    mean += b * hist.at<float>(b);
+  }
+
+  return mean/sum;
 }
 
 int main(int argc, char * argv[])

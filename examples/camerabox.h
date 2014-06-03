@@ -21,7 +21,12 @@
 #include <string>
 #include <vector>
 
+#include <opencv/cv.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
 #include <PiFaceStateMachine.h>
+#include <NeguPiFIFO.h>
 
 #include <imageoptions.h>
 
@@ -42,6 +47,8 @@ protected:
   void checkClipOutputDirectory();
   void readImageOptions();
   void readConfig();
+
+  double getBrightness(const cv::Mat& image);
 
   std::string outputImageDir_;
   std::string outputClipDir_;
@@ -66,4 +73,6 @@ protected:
   int imageCount_;
   int clipLoopCount_;
   int clipCount_;
+
+  NeguPi::FIFO<double,10> brightness_;
 };

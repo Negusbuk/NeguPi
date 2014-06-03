@@ -69,6 +69,42 @@ double getBrightness(const cv::Mat& image)
   return mean/sum;
 }
 
+/*
+double getBrightness(const cv::Mat& image)
+{
+  //cv::Mat hsv_image;
+  //cv::cvtColor(image, hsv_image, CV_BGR2HSV);
+
+  int bins = 256;
+  int histSize[] = { bins };
+  // Set ranges for histogram bins
+  float lranges[] = { 0, 256 };
+  const float* ranges[] = { lranges };
+
+  // create matrix for histogram
+  cv::Mat hist0;
+  int channels0[] = { 0 };
+  cv::calcHist(&image, 1, channels0, cv::Mat(), hist0, 1, histSize, ranges, true, false);
+
+  cv::Mat hist1;
+  int channels1[] = { 1 };
+  cv::calcHist(&image, 1, channels1, cv::Mat(), hist1, 1, histSize, ranges, true, false);
+
+  cv::Mat hist2;
+  int channels2[] = { 2 };
+  cv::calcHist(&image, 1, channels2, cv::Mat(), hist2, 1, histSize, ranges, true, false);
+
+  double sum = image.rows * image.cols;
+  double mean = 0;
+
+  for (int b = 0;b<bins;b++) {
+    mean += b * (0.0722*hist0.at<float>(b) + 0.7152*hist1.at<float>(b) + 0.2126*hist2.at<float>(b));
+  }
+
+  return mean/sum;
+}
+*/
+
 int main(int argc, char * argv[])
 {
   if (argc==1) return -1;
@@ -88,13 +124,13 @@ int main(int argc, char * argv[])
     std::cout << i << std::endl;
     imageInfo.push_back(std::make_tuple(i++, filename, brightness, true));
 
-    if (i==60) break;
+    //if (i==60) break;
   }
 
   std::vector<imageInfo_t>::iterator it = imageInfo.begin();
-  ++it;
+  ++it;++it;
   std::vector<imageInfo_t>::iterator itend = imageInfo.end();
-  --itend;
+  --itend;--itend;
 
   for (;
        it!=itend;
@@ -117,7 +153,7 @@ int main(int argc, char * argv[])
 
     double value = std::get<2>(info);
     double delta = mean-value;
-    if (std::fabs(delta)>2.5) {
+    if (std::fabs(delta)>5.0) {
       std::get<3>(info) = false;
       std::cout << std::get<1>(info) << "\t" << value << "\t" << delta << std::endl;
 
@@ -154,7 +190,7 @@ int main(int argc, char * argv[])
         masks[i].create(images[i].size(), CV_8U);
         masks[i].setTo(cv::Scalar::all(255));
 
-        corners[i] = cv::Point(10, 10);
+        corners[i] = cv::Point(100, 100);
       }
 
       compensator->feed(corners, images, masks);
@@ -164,16 +200,32 @@ int main(int argc, char * argv[])
       mask.setTo(cv::Scalar::all(255));
       compensator->apply(1, corners[1], images[1], mask);
 
+      compensator->feed(corners, images, masks);
+      compensator->apply(1, corners[1], images[1], mask);
+
       double bn = getBrightness(images[0]);
       double b = getBrightness(images[1]);
       delta = bn - b;
-      //std::cout << bn << "\t" << b << std::endl;
+      std::cout << delta << std::endl;
 
       cv::Mat image_new;
       cv::cvtColor(images[1], image_new, CV_BGR2HSV);
       image_new += cv::Scalar(0, 0, delta);
+      //images[1] += cv::Scalar(delta, delta, delta);
       cv::cvtColor(image_new, images[1], CV_HSV2BGR);
       //image.convertTo(image_new, -1, mean/value, 0);
+
+      b = getBrightness(images[1]);
+      delta = bn - b;
+      std::cout << delta << std::endl;
+
+      image_new += cv::Scalar(0, 0, delta);
+      //images[1] += cv::Scalar(delta, delta, delta);
+      cv::cvtColor(image_new, images[1], CV_HSV2BGR);
+
+      b = getBrightness(images[1]);
+      delta = bn - b;
+      std::cout << delta << std::endl;
 
       //std::cout << getBrightness(image) << "\t" << getBrightness(image_new) << std::endl;
 

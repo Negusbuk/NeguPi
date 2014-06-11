@@ -22,7 +22,7 @@ touch(lockfile)
 CMD  = "raspivid "
 CMD += "--width 1280 "
 CMD += "--height 720 "
-CMD += "--bitrate 5000000 "
+CMD += "--bitrate 8000000 "
 CMD += "--framerate 25 "
 CMD += "--timeout 1 "
 CMD += "-t 900000 "

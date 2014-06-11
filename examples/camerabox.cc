@@ -78,7 +78,7 @@ CameraBox::CameraBox(PiFace* piface)
   imageArgsVector_.push_back("-o"); imageArgsVector_.push_back(outputImageDir_ + "/image_XXX_YYYYYYYY.jpg ");
   imageArgsVector_.push_back("-w"); imageArgsVector_.push_back("1280");
   imageArgsVector_.push_back("-h"); imageArgsVector_.push_back("720");
-  imageArgsVector_.push_back("-t"); imageArgsVector_.push_back("500");
+  imageArgsVector_.push_back("-t"); imageArgsVector_.push_back("501");
   imageArgsVector_.push_back("-n"); imageArgsVector_.push_back("-n");
   imageArgsVector_.push_back("-th"); imageArgsVector_.push_back("none");
 
@@ -198,11 +198,12 @@ void CameraBox::heartBeat(int milliseconds)
         int status;
         waitpid(child_pid, &status, 0);
 
+	/*
         cv::Mat image = cv::imread(imageArgs_[2], 1);
         double brightness = getBrightness(image);
         Log() << "brightness: " << brightness;
-
         brightness_.add(brightness);
+        */
       }
 
       delayImage_ = 0;

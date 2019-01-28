@@ -1,6 +1,8 @@
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(OPENCV REQUIRED opencv4)
+pkg_check_modules(OPENCV REQUIRED opencv)
 pkg_check_modules(CONFIGPP REQUIRED libconfig++)
+
+find_package(Threads REQUIRED)
 
 include_directories(.)
 include_directories(${PROJECT_SOURCE_DIR}/src/)
@@ -33,5 +35,6 @@ add_executable(statemachine statemachine.cc)
 #target_link_libraries(recognition ${OPENCV_LIBRARIES})
 
 add_executable(readGPS readGPS.cc)
+target_link_libraries(readGPS ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(mpu6050_1 mpu6050_1.cc)

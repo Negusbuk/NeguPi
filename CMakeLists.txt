@@ -15,6 +15,7 @@ add_library(NeguPi SHARED
 	src/NeguPiLogger.cc
 	src/NeguPiDaemon.cc
 	src/NeguPiMillis.cc
+	src/NeguPiI2CDevice.cc
 	src/VMCP23S17.cc
 	src/MCP23S17Fake.cc
 	src/MCP23S17.cc
@@ -27,6 +28,7 @@ install(FILES
 	src/NeguPiLogger.h
 	src/NeguPiDaemon.h
 	src/NeguPiMillis.h
+	src/NeguPiI2CDevice.h
 	src/VMCP23S17.h
 	src/MCP23S17Fake.h
 	src/MCP23S17.h

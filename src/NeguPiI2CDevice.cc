@@ -50,7 +50,7 @@ namespace NeguPi {
 
     isOpen_ = false;
 
-    if ((fd_ = ::open(device_, O_RDWR)) < 0) {
+    if ((fd_ = ::open(device_.c_str(), O_RDWR)) < 0) {
       std::cerr << "Failed to open i2c port" << std::endl;
       return false;
     }
@@ -108,15 +108,15 @@ namespace NeguPi {
   void I2CDevice::writeByte(unsigned int reg, int8_t value)
   {
 #ifndef NODEVICE
-    i2c_smbus_write_byte_data(fd, reg, value);
+    i2c_smbus_write_byte_data(fd_, reg, value);
 #endif
   }
 
   void I2CDevice::writeWord(unsigned int reg, int16_t value)
   {
 #ifndef NODEVICE
-    i2c_smbus_write_byte_data(fd, reg + 0x01, value & 0xff);
-    i2c_smbus_write_byte_data(fd, reg, (value >> 8) & 0xff);
+    i2c_smbus_write_byte_data(fd_, reg + 0x01, value & 0xff);
+    i2c_smbus_write_byte_data(fd_, reg, (value >> 8) & 0xff);
 #endif
   }
 

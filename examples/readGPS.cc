@@ -19,16 +19,20 @@
  ****************************************************************************/
 
 #include <stdio.h>
-#include <unistd.h>			//Used for UART
-#include <fcntl.h>			//Used for UART
-#include <termios.h>		//Used for UART
+#include <unistd.h>
+#include <fcntl.h>
+#include <termios.h>
 
 #include <iostream>
+#include <iomanip>
+#include <string>
+#include <sstream>
 #include <utility>
 #include <thread>
 #include <chrono>
 #include <functional>
 #include <atomic>
+#include <mutex>
 
 #include <TinyGPS++.h>
 
@@ -48,23 +52,38 @@ const unsigned char UBLOX_INIT[] = {
 };
 
 TinyGPSPlus gps;
-int gpsfd = -1;
 
-void read_gps()
+void read_gps(int gpsfd)
 {
+	std::mutex mutex;
+
 	while (1) {
 		char buffer;
 		while (read(gpsfd, &buffer, 1)==1) {
-			std::cout << buffer;
-
 			if (gps.encode(buffer)) {
 				if (gps.location.isUpdated() && gps.date.isUpdated() && gps.time.isUpdated()) {
-					std::cout << "g ";
-					std::cout << NeguPi::Millis::instance()->get() << " ";
-					std::cout << gps.satellites.value() << " ";
-					std::cout << gps.location.lat() << " ";
-					std::cout << gps.location.lng() << " ";
-					std::cout << std::endl;
+					std::string s;
+					std::ostringstream ss(s);
+
+					ss << "g ";
+					ss << std::setw(12) << NeguPi::Millis::instance()->get() << " ";
+					ss << std::setw(2) << gps.satellites.value() << " ";
+					ss << std::showpos;
+					ss << std::setw(11) << std::fixed << std::setprecision(6) << gps.location.lat() << " ";
+					ss << std::setw(10) << std::fixed << std::setprecision(6) << gps.location.lng() << " ";
+					ss << std::setw(9) << std::fixed << std::setprecision(2) << gps.altitude.meters() << " ";
+					ss << std::noshowpos;
+					ss << std::setw(4) << std::setfill('0') << (int)gps.date.year() << " ";
+					ss << std::setw(2) << std::setfill('0') << (int)gps.date.month() << " ";
+					ss << std::setw(2) << std::setfill('0') << (int)gps.date.day() << " ";
+					ss << std::setw(2) << std::setfill('0') << (int)gps.time.hour() << " ";
+					ss << std::setw(2) << std::setfill('0') << (int)gps.time.minute() << " ";
+					ss << std::setw(2) << std::setfill('0') << (int)gps.time.second() << " ";
+					ss << (int)gps.time.centisecond();
+
+				    std::lock_guard<std::mutex> guard(mutex);
+
+				    Log() << ss.str();
 
 					gps.location.rawLat();
 					gps.date.value();
@@ -72,14 +91,12 @@ void read_gps()
 				}
 			}
 		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		// std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 }
 
-int main(int argc, char * argv[])
+int configure()
 {
-	NeguPi::Millis::instance();
-
 	//-------------------------
 	//----- SETUP USART 0 -----
 	//-------------------------
@@ -97,14 +114,11 @@ int main(int argc, char * argv[])
 	//											immediately with a failure status if the output can't be written immediately.
 	//
 	//	O_NOCTTY - When set and path identifies a terminal device, open() shall not cause the terminal device to become the controlling terminal for the process.
-	gpsfd = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NDELAY);		//Open in non blocking read/write mode
-	if (gpsfd == -1)
-	{
-		//ERROR - CAN'T OPEN SERIAL PORT
-		printf("Error - Unable to open UART.  Ensure it is not in use by another application\n");
+	int gpsfd = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NDELAY); //Open in non blocking read/write mode
+	if (gpsfd == -1) {
+		Log() << "Error - Unable to open UART.  Ensure it is not in use by another application";
+		return -1;
 	}
-
-	std::cout << gpsfd << std::endl;
 
 	//CONFIGURE THE UART
 	//The flags (defined in /usr/include/termios.h - see http://pubs.opengroup.org/onlinepubs/007908799/xsh/termios.h.html):
@@ -122,7 +136,7 @@ int main(int argc, char * argv[])
 	options.c_iflag = IGNPAR;
 	options.c_oflag = 0;
 	options.c_lflag = 0;
-	//tcflush(gpsfd, TCIFLUSH);
+	tcflush(gpsfd, TCIFLUSH);
 	tcsetattr(gpsfd, TCSANOW, &options);
 
     write(gpsfd, (const void*)UBLOX_INIT, sizeof(UBLOX_INIT));
@@ -135,14 +149,15 @@ int main(int argc, char * argv[])
 
 	close(gpsfd);
 
-	gpsfd = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NDELAY);		//Open in non blocking read/write mode
-	if (gpsfd == -1)
-	{
-		//ERROR - CAN'T OPEN SERIAL PORT
-		printf("Error - Unable to open UART.  Ensure it is not in use by another application\n");
-	}
+	return 0;
+}
 
-	std::cout << gpsfd << std::endl;
+int open_UART()
+{
+	int gpsfd = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY);		//Open in non blocking read/write mode
+	if (gpsfd == -1) {
+		Log() << "Error - Unable to open UART.  Ensure it is not in use by another application";
+	}
 
 	//CONFIGURE THE UART
 	//The flags (defined in /usr/include/termios.h - see http://pubs.opengroup.org/onlinepubs/007908799/xsh/termios.h.html):
@@ -154,22 +169,40 @@ int main(int argc, char * argv[])
 	//	ICRNL - Map CR to NL on input (Use for ASCII comms where you want to auto correct end of line characters - don't use for bianry comms!)
 	//	PARENB - Parity enable
 	//	PARODD - Odd parity (else even)
+	struct termios options;
 	tcgetattr(gpsfd, &options);
 	options.c_cflag = B38400 | CS8 | CLOCAL | CREAD;		//<Set baud rate
 	options.c_iflag = IGNPAR;
 	options.c_oflag = 0;
 	options.c_lflag = 0;
-	//tcflush(gpsfd, TCIFLUSH);
+	tcflush(gpsfd, TCIFLUSH);
 	tcsetattr(gpsfd, TCSANOW, &options);
 
-	std::thread gps_thread(read_gps);
+	return gpsfd;
+}
+
+int main(int argc, char * argv[])
+{
+	Logger::instance(false);
+
+	NeguPi::Millis::instance();
+
+	if (configure()) {
+		return EXIT_FAILURE;
+	}
+
+	int gpsfd = open_UART();
+	if (gpsfd==-1) {
+		return EXIT_FAILURE;
+	}
+
+	std::thread gps_thread(read_gps, gpsfd);
 
 	while (1) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 
-	//----- CLOSE THE UART -----
 	close(gpsfd);
 
-	return 0;
+	return EXIT_SUCCESS;
 }

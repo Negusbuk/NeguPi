@@ -1,12 +1,31 @@
-// MPU6050 code.
+/****************************************************************************
+ **
+ **  Copyright (C) 2013 - 2019 Andreas Mussgiller
+ **
+ **  This program is free software: you can redistribute it and/or modify
+ **  it under the terms of the GNU General Public License as published by
+ **  the Free Software Foundation, either version 3 of the License, or
+ **  (at your option) any later version.
+ **
+ **  This program is distributed in the hope that it will be useful,
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ **  GNU General Public License for more details.
+ **
+ **  You should have received a copy of the GNU General Public License
+ **  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ **
+ **
+ ****************************************************************************/
 
-#include <stdio.h>
-#include <linux/i2c-dev.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
 #include <sys/types.h>
-#include <unistd.h>
+
+#include <iostream>
+#include <iomanip>
+#include <thread>
+#include <chrono>
+
+#include <NeguPiI2CDevice.h>
 
 #define MPU_ACCEL_XOUT1 0x3b
 #define MPU_ACCEL_XOUT2 0x3c
@@ -30,47 +49,39 @@
 
 int main(int argc, char **argv)
 {
-    int fd;
-    const char *fileName = "/dev/i2c-1";
-    int  address = 0x68;
-	
-    if ((fd = open(fileName, O_RDWR)) < 0) {
-        printf("Failed to open i2c port\n");
-        exit(1);
-    }
-	
-    if (ioctl(fd, I2C_SLAVE, address) < 0) {
-        printf("Unable to get bus access to talk to slave\n");
-        exit(1);
-    }
-    
-    int8_t power = i2c_smbus_read_byte_data(fd, MPU_POWER1);
-    i2c_smbus_write_byte_data(fd, MPU_POWER1, ~(1 << 6) & power);
+	NeguPi::I2CDevice mpu6050("/dev/i2c-1", 0x68);
 
-    while (1) {
-        int16_t temp = i2c_smbus_read_byte_data(fd, MPU_TEMP1) << 8 |
-                        i2c_smbus_read_byte_data(fd, MPU_TEMP2);
+	if (!mpu6050.open()) return EXIT_FAILURE;
 
-        int16_t xaccel = i2c_smbus_read_byte_data(fd, MPU_ACCEL_XOUT1) << 8 |
-                         i2c_smbus_read_byte_data(fd, MPU_ACCEL_XOUT2);
-        int16_t yaccel = i2c_smbus_read_byte_data(fd, MPU_ACCEL_YOUT1) << 8 |
-                         i2c_smbus_read_byte_data(fd, MPU_ACCEL_YOUT2);
-        int16_t zaccel = i2c_smbus_read_byte_data(fd, MPU_ACCEL_ZOUT1) << 8 |
-                         i2c_smbus_read_byte_data(fd, MPU_ACCEL_ZOUT2);
+	int8_t power = mpu6050.readByte(MPU_POWER1);
+	mpu6050.writeByte(MPU_POWER1, ~(1 << 6) & power);
 
-        int16_t xgyro = i2c_smbus_read_byte_data(fd, MPU_GYRO_XOUT1) << 8 |
-                        i2c_smbus_read_byte_data(fd, MPU_GYRO_XOUT2);
-        int16_t ygyro = i2c_smbus_read_byte_data(fd, MPU_GYRO_YOUT1) << 8 |
-                        i2c_smbus_read_byte_data(fd, MPU_GYRO_YOUT2);
-        int16_t zgyro = i2c_smbus_read_byte_data(fd, MPU_GYRO_ZOUT1) << 8 |
-                        i2c_smbus_read_byte_data(fd, MPU_GYRO_ZOUT2);
+	while(1) {
+		int16_t temp = mpu6050.readWord(MPU_TEMP1);
 
-        printf("temp: %f\n", (float)temp / 340.0f + 36.53);
-        printf("accel x,y,z: %d, %d, %d\n", (int)xaccel, (int)yaccel, (int)zaccel);
-        printf("gyro x,y,z: %d, %d, %d\n\n", (int)xgyro, (int)ygyro, (int)zgyro);
-        sleep(1);
-    }
-		
+		int16_t xaccel = mpu6050.readWord(MPU_ACCEL_XOUT1);
+		int16_t yaccel = mpu6050.readWord(MPU_ACCEL_YOUT1);
+		int16_t zaccel = mpu6050.readWord(MPU_ACCEL_ZOUT1);
+
+		int16_t xgyro = mpu6050.readWord(MPU_GYRO_XOUT1);
+		int16_t ygyro = mpu6050.readWord(MPU_GYRO_YOUT1);
+		int16_t zgyro = mpu6050.readWord(MPU_GYRO_ZOUT1);
+
+		std::cout << "temp; accel x,y,z; gyro x,y,z: "
+				<< std::fixed << std::setw(6) << std::setprecision(2)
+		        << (float)temp / 340.0f + 36.53
+				<< std::setw(6) << (int)xaccel
+				<< std::setw(6) << (int)yaccel
+				<< std::setw(6) << (int)zaccel
+				<< std::setw(6) << (int)xgyro
+				<< std::setw(6) << (int)ygyro
+				<< std::setw(6) << (int)zgyro << std::endl;
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	}
+
+	mpu6050.close();
+
     return 0;
 }
 

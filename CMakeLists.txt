@@ -42,11 +42,12 @@ configure_file (
   "${PROJECT_BINARY_DIR}/NeguPi.h"
 )
 
+add_subdirectory(examples)
+
 # add the binary tree to the search path for include files
 # so that we will find NeguPi.h
 include_directories ("${PROJECT_BINARY_DIR}")
 
 # add the install targets
-install (TARGETS NeguPi DESTINATION lib)
-install (FILES "${PROJECT_BINARY_DIR}/NeguPi.h"        
-         DESTINATION include)
+install(TARGETS NeguPi DESTINATION lib)
+install(FILES "${PROJECT_BINARY_DIR}/NeguPi.h" DESTINATION include)

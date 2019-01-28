@@ -1,20 +1,22 @@
 
 SOURCES = NeguPiLogger.cc \
+		  NeguPiMillis.cc \
           NeguPiDaemon.cc \
           VMCP23S17.cc \
-	  MCP23S17Fake.cc \
-	  MCP23S17.cc \
-	  PiFace.cc \
-	  PiFaceStateMachine.cc
+	  	  MCP23S17Fake.cc \
+	      MCP23S17.cc \
+	      PiFace.cc \
+	      PiFaceStateMachine.cc \
+	      TinyGPS++.cc
 
 MACHINE:= $(shell uname -m)
 NODEVICE=0
-ifneq "$(MACHINE)" "armv6l"
+ifneq "$(MACHINE)" "armv7l"
 	NODEVICE=1
 endif
 
 LDFLAGS=
-CPPFLAGS=-std=c++0x -c -Wall
+CPPFLAGS=-std=c++17 -c -Wall
 CPP=g++
 
 ifeq "$(NODEVICE)" "1"

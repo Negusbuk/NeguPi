@@ -3,7 +3,8 @@ EXAMPLES= blink \
           timelapse \
           videocapture \
           camerabox \
-          recognition
+          recognition \
+          readGPS
 
 INCPATHS=../src ./
 LIBPATHS=../src
@@ -56,6 +57,9 @@ camerabox: camerabox.cc camerabox.h imageoptions.cc imageoptions.h ../src/libNeg
 
 recognition: recognition.cc ../src/libNeguPi.a
 	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS)
+
+readGPS: readGPS.cc ../src/libNeguPi.a
+	g++ -o $@ $< $(CPPFLAGS) $(INCFLAGS) $(LDFLAGS) -pthread
 
 distclean: clean
 	rm -fr ../bin

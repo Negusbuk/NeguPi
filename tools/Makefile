@@ -5,7 +5,7 @@ LIBPATHS=../src
 
 MACHINE:= $(shell uname -m)
 NODEVICE=0
-ifneq "$(MACHINE)" "armv6l"
+ifneq "$(MACHINE)" "armv7l"
 	NODEVICE=1
 	INCPATHS+=/opt/local/include /opt/local/include/opencv /opt/local/include/opencv2
 	LDFLAGS=-L/opt/local/lib -lconfig++
@@ -20,7 +20,7 @@ CPP=g++
 ifeq "$(NODEVICE)" "1"
 CPPFLAGS+= -DNODEVICE
 else
-CPPFLAGS+= $(shell pkg-config --cflags opencv) -I/usr/local/include/opencv2
+CPPFLAGS+= $(shell pkg-config --cflags opencv) -I/usr/include/opencv2
 endif
 
 LDFLAGS+= $(shell pkg-config --libs opencv)

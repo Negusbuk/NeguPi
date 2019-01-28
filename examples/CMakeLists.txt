@@ -1,5 +1,12 @@
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(OPENCV REQUIRED opencv)
+
+if(${ARCHITECTURE} STREQUAL "armv7l")
+	pkg_check_modules(OPENCV REQUIRED opencv)
+else()
+	pkg_check_modules(OPENCV REQUIRED opencv4)
+endif()
+
+
 pkg_check_modules(CONFIGPP REQUIRED libconfig++)
 
 find_package(Threads REQUIRED)

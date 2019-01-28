@@ -42,6 +42,7 @@ configure_file (
   "${PROJECT_BINARY_DIR}/NeguPi.h"
 )
 
+add_subdirectory(tools)
 add_subdirectory(examples)
 
 # add the binary tree to the search path for include files

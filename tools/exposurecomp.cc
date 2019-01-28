@@ -37,11 +37,10 @@
 #include <tuple>
 #include <cmath>
 
-#include <opencv/cv.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/features2d/features2d.hpp>
-#include <stitching/detail/exposure_compensate.hpp>
+#include <opencv2/stitching/detail/exposure_compensate.hpp>
 
 typedef std::tuple<int,std::string,double,bool> imageInfo_t;
 

@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.7)
-project(NeguPi VERSION 2.1 DESCRIPTION "NeguPi")
+project(NeguPi VERSION 2.1.0 LANGUAGES C CXX)
 
-set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD 14)
 
 EXECUTE_PROCESS(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE)
 message(STATUS "Architecture: ${ARCHITECTURE}")
@@ -22,7 +22,7 @@ add_library(NeguPi SHARED
 	src/PiFaceStateMachine.cc
 	src/TinyGPS++.cc
 )
-         
+
 install(FILES
 	src/NeguPiLogger.h
 	src/NeguPiDaemon.h

@@ -31,3 +31,7 @@ add_executable(statemachine statemachine.cc)
 #target_include_directories(recognition PUBLIC ${CONFIGPP_INCLUDE_DIRS})
 #target_include_directories(recognition PUBLIC ${OPENCV_INCLUDE_DIRS})
 #target_link_libraries(recognition ${OPENCV_LIBRARIES})
+
+add_executable(readGPS readGPS.cc)
+
+add_executable(mpu6050_1 mpu6050_1.cc)

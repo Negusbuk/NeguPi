@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.9)
+cmake_minimum_required (VERSION 3.7)
 project(NeguPi VERSION 2.1 DESCRIPTION "NeguPi")
 
 set (CMAKE_CXX_STANDARD 17)
@@ -14,21 +14,25 @@ endif()
 add_library(NeguPi SHARED
 	src/NeguPiLogger.cc
 	src/NeguPiDaemon.cc
+	src/NeguPiMillis.cc
 	src/VMCP23S17.cc
 	src/MCP23S17Fake.cc
 	src/MCP23S17.cc
 	src/PiFace.cc
 	src/PiFaceStateMachine.cc
+	src/TinyGPS++.cc
 )
          
 install(FILES
 	src/NeguPiLogger.h
 	src/NeguPiDaemon.h
+	src/NeguPiMillis.h
 	src/VMCP23S17.h
 	src/MCP23S17Fake.h
 	src/MCP23S17.h
 	src/PiFace.h
 	src/PiFaceStateMachine.h
+	src/TinyGPS++.h
 	DESTINATION include)
 
 target_include_directories(NeguPi PRIVATE src)

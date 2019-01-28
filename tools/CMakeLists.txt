@@ -1,5 +1,5 @@
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(OPENCV REQUIRED opencv4)
+pkg_check_modules(OPENCV REQUIRED opencv)
 pkg_check_modules(CONFIGPP REQUIRED libconfig++)
 
 include_directories(.)

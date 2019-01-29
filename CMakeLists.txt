@@ -22,7 +22,6 @@ add_library(NeguPi SHARED
 	src/MCP23S17.cc
 	src/PiFace.cc
 	src/PiFaceStateMachine.cc
-	src/TinyGPS++.cc
 )
 
 install(FILES
@@ -36,7 +35,6 @@ install(FILES
 	src/MCP23S17.h
 	src/PiFace.h
 	src/PiFaceStateMachine.h
-	src/TinyGPS++.h
 	DESTINATION include)
 
 target_include_directories(NeguPi PRIVATE src)

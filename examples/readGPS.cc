@@ -34,8 +34,6 @@
 #include <atomic>
 #include <mutex>
 
-#include <TinyGPS++.h>
-
 #include <NeguPiDaemon.h>
 #include <NeguPiLogger.h>
 #include <NeguPiMillis.h>

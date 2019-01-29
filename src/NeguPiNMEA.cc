@@ -128,6 +128,24 @@ namespace NeguPi {
 
   }
 
+  GPSCourse::GPSCourse(const GPSLocation& loc1, const GPSLocation& loc2)
+  {
+    setValid(true);
+    setValue(loc1.courseTo(loc2));
+  }
+
+  const std::string& GPSCourse::cardinal() const
+  {
+    static const std::string directions[] =
+        {
+         "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
+        };
+
+    int direction = (int)((deg() + 11.25) / 22.5);
+
+    return directions[direction % 16];
+  }
+
   NMEA::NMEA()
   : buffer_(""),
     sizeOfBuffer_(0),

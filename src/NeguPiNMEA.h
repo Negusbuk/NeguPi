@@ -167,8 +167,10 @@ namespace NeguPi {
   public:
 
     GPSCourse() { }
+    GPSCourse(const GPSLocation& loc1, const GPSLocation& loc2);
 
     double deg() const { return value(); }
+    const std::string& cardinal() const;
   };
 
   class GPSAltitude : public GPSDoubleValue

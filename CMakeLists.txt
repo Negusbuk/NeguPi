@@ -20,6 +20,7 @@ add_library(NeguPi SHARED
 	src/VMCP23S17.cc
 	src/MCP23S17Fake.cc
 	src/MCP23S17.cc
+	src/MPU6050.cc
 	src/PiFace.cc
 	src/PiFaceStateMachine.cc
 )
@@ -33,6 +34,7 @@ install(FILES
 	src/VMCP23S17.h
 	src/MCP23S17Fake.h
 	src/MCP23S17.h
+	src/MPU6050.cc
 	src/PiFace.h
 	src/PiFaceStateMachine.h
 	DESTINATION include)

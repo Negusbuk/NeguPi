@@ -77,8 +77,6 @@ namespace NeguPi {
   {
     bool retval = false;
 
-    buffer_ += c;
-
     switch(c) {
     case '$':
       startOfSentence_ = sizeOfBuffer_;
@@ -86,10 +84,15 @@ namespace NeguPi {
     case '*':
       endOfSentence_ = sizeOfBuffer_;
       break;
+    case '\r':
+    case '\n':
+      return retval;
+      break;
     default:
       break;
     }
 
+    buffer_ += c;
     sizeOfBuffer_ = buffer_.length();
 
     if (startOfSentence_==-1 &&
@@ -111,8 +114,6 @@ namespace NeguPi {
                                                   endOfSentence_+2),
                                    0, 0x10);
 
-      // std::cout << sentence << " " << (int)checksum << std::endl;
-
       if (testChecksum(sentence, checksum)) {
         retval = processSentence(sentence);
       }
@@ -133,7 +134,7 @@ namespace NeguPi {
     std::string type = sentence.substr(0, idx);
     sentence.erase(0, idx+1);
 
-    // std::cout << sentence << std::endl;
+    // std::cout << "processSentence() " << sentence << std::endl;
 
     if (type=="GPRMC") return processGPRMCSentence(sentence);
     if (type=="GPGGA") return processGPGGASentence(sentence);
@@ -270,7 +271,7 @@ namespace NeguPi {
 
   bool NMEA::processGPGGASentence(std::string & sentence)
   {
-    std::cout << sentence << std::endl;
+    // std::cout << sentence << std::endl;
 
     size_t idx;
     std::string sub;

@@ -91,9 +91,8 @@ void read_gps(int gpsfd)
           ss << std::setw(2) << std::setfill('0') << gps.time().minute() << " ";
           ss << std::setw(4) << std::setfill('0') << std::fixed << std::setprecision(1) << gps.time().second() << " ";
           ss << std::setw(7) << std::setfill(' ') << std::fixed << std::setprecision(1) << gps.location().distanceTo(London) / 1000. << " ";
-          ss << std::showpos;
           GPSCourse course(gps.location(), London);
-          ss << std::setw(6) << std::fixed << std::setprecision(1) << course.deg();
+          ss << std::setw(5) << std::fixed << std::setprecision(1) << course.deg();
           ss << course.cardinal();
 
           std::lock_guard<std::mutex> guard(mutex);

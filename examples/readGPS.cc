@@ -39,6 +39,7 @@
 #include <NeguPiDaemon.h>
 #include <NeguPiLogger.h>
 #include <NeguPiMillis.h>
+#include <NeguPiNMEA.h>
 
 using namespace NeguPi;
 
@@ -51,7 +52,7 @@ const unsigned char UBLOX_INIT[] = {
   0x38, 0x34, 0x30, 0x30, 0x2c, 0x30, 0x2a, 0x32, 0x34, 0x0d, 0x0a
 };
 
-TinyGPSPlus gps;
+NMEA gps;
 
 void read_gps(int gpsfd)
 {
@@ -60,13 +61,32 @@ void read_gps(int gpsfd)
 	while (1) {
 		char buffer;
 		while (read(gpsfd, &buffer, 1)==1) {
-			if (gps.encode(buffer)) {
-				if (gps.location.isUpdated() && gps.date.isUpdated() && gps.time.isUpdated()) {
+			if (gps.process(buffer)) {
+				if (gps.location().isValid() &&
+				    gps.date().isValid() &&
+				    gps.time().isValid() &&
+				    gps.satellites().isValid()) {
+
 					std::string s;
 					std::ostringstream ss(s);
 
 					ss << "g ";
 					ss << std::setw(12) << NeguPi::Millis::instance()->get() << " ";
+					ss << std::noshowpos;
+					ss << std::setw(2) << gps.satellites().count() << " ";
+					ss << std::showpos;
+					ss << std::setw(10) << std::fixed << std::setprecision(7) << gps.location().latitude() << " ";
+					ss << std::setw(11) << std::fixed << std::setprecision(7) << gps.location().longitude() << " ";
+					ss << std::setw(9) << std::fixed << std::setprecision(1) << gps.altitude().meters() << " ";
+					ss << std::noshowpos;
+					ss << std::setw(4) << gps.date().year() << " ";
+					ss << std::setw(2) << std::setfill('0') << gps.date().month() << " ";
+					ss << std::setw(2) << std::setfill('0') << gps.date().day() << " ";
+					ss << std::setw(2) << std::setfill('0') << gps.time().hour() << " ";
+					ss << std::setw(2) << std::setfill('0') << gps.time().minute() << " ";
+					ss << std::setw(4) << std::fixed << std::setprecision(1) << gps.time().second() << " ";
+
+					/*
 					ss << std::setw(2) << gps.satellites.value() << " ";
 					ss << std::showpos;
 					ss << std::setw(11) << std::fixed << std::setprecision(6) << gps.location.lat() << " ";
@@ -80,14 +100,11 @@ void read_gps(int gpsfd)
 					ss << std::setw(2) << std::setfill('0') << (int)gps.time.minute() << " ";
 					ss << std::setw(2) << std::setfill('0') << (int)gps.time.second() << " ";
 					ss << (int)gps.time.centisecond();
+					*/
 
 				    std::lock_guard<std::mutex> guard(mutex);
 
 				    Log() << ss.str();
-
-					gps.location.rawLat();
-					gps.date.value();
-					gps.time.value();
 				}
 			}
 		}

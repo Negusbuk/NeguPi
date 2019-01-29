@@ -1,6 +1,8 @@
 /****************************************************************************
  **
- **  Copyright (C) 2013 - 2019 Andreas Mussgiller
+ **  Copyright (C) 2019 Andreas Mussgiller
+ **  Based on and inspired by TinyGPS++ courtesy of Mikal Hart.
+ **  "distanceTo" and "courseTo" methods courtesy of Maarten Lamers.
  **
  **  This program is free software: you can redistribute it and/or modify
  **  it under the terms of the GNU General Public License as published by
@@ -34,10 +36,14 @@ namespace NeguPi {
   public:
 
     GPSLocation();
+    GPSLocation(double latitude, double longitude);
 
     bool isValid() const { return valid_; }
     double latitude() const { return latitude_; }
     double longitude() const { return longitude_; }
+
+    double distanceTo(const GPSLocation& other) const;
+    double courseTo(const GPSLocation& other) const;
 
   protected:
 

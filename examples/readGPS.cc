@@ -54,6 +54,8 @@ const unsigned char UBLOX_INIT[] = {
 
 NMEA gps;
 
+GPSLocation London(51.508131, -0.128002);
+
 void read_gps(int gpsfd)
 {
 	std::mutex mutex;
@@ -73,8 +75,8 @@ void read_gps(int gpsfd)
 					std::ostringstream ss(s);
 
 					ss << "g ";
+                    ss << std::noshowpos;
 					ss << std::setw(12) << NeguPi::Millis::instance()->get() << " ";
-					ss << std::noshowpos;
 					ss << std::setw(2) << gps.satellites().count() << " ";
 					ss << std::showpos;
 					ss << std::setw(10) << std::fixed << std::setprecision(7) << gps.location().latitude() << " ";
@@ -87,6 +89,9 @@ void read_gps(int gpsfd)
 					ss << std::setw(2) << std::setfill('0') << gps.time().hour() << " ";
 					ss << std::setw(2) << std::setfill('0') << gps.time().minute() << " ";
 					ss << std::setw(4) << std::fixed << std::setprecision(1) << gps.time().second() << " ";
+					ss << std::setw(6) << (int) gps.location().distanceTo(London) << " ";
+                    ss << std::showpos;
+					ss << std::setw(6) << std::fixed << std::setprecision(1) << gps.location().courseTo(London);
 
 				    std::lock_guard<std::mutex> guard(mutex);
 

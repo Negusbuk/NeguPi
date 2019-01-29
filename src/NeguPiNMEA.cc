@@ -1,6 +1,8 @@
 /****************************************************************************
  **
- **  Copyright (C) 2013 - 2019 Andreas Mussgiller
+ **  Copyright (C) 2019 Andreas Mussgiller
+ **  Based on and inspired by TinyGPS++ courtesy of Mikal Hart.
+ **  "distanceTo" and "courseTo" methods courtesy of Maarten Lamers.
  **
  **  This program is free software: you can redistribute it and/or modify
  **  it under the terms of the GNU General Public License as published by
@@ -19,6 +21,7 @@
  ****************************************************************************/
 
 #include <iostream>
+#include <cmath>
 
 #include "NeguPiNMEA.h"
 
@@ -30,6 +33,67 @@ namespace NeguPi {
     longitude_(0.)
   {
 
+  }
+
+  GPSLocation::GPSLocation(double latitude, double longitude)
+  : valid_(true),
+    latitude_(latitude),
+    longitude_(longitude)
+  {
+
+  }
+
+  double GPSLocation::distanceTo(const GPSLocation& other) const
+  {
+    // returns distance in meters to second location. Uses great-circle
+    // distance computation for hypothetical sphere of radius 6372795 meters.
+    // Because Earth is no exact sphere, rounding errors may be up to 0.5%.
+    // Courtesy of Maarten Lamers
+
+    double delta = (this->longitude_ - other.longitude_) * M_PI / 180.;
+    double sinDeltaLongitude = std::sin(delta);
+    double cosDeltaLongitude = std::cos(delta);
+
+    double thisLatitude = this->latitude_ * M_PI / 180.;
+    double otherLatitude = other.latitude_ * M_PI / 180.;
+    double sinThisLatitude = std::sin(thisLatitude);
+    double cosThisLatitude = std::cos(thisLatitude);
+    double sinOtherLatitude = std::sin(otherLatitude);
+    double cosOtherLatitude = std::cos(otherLatitude);
+
+    delta = (cosThisLatitude * sinOtherLatitude) - (sinThisLatitude * cosOtherLatitude * cosDeltaLongitude);
+    delta = std::pow(delta, 2);
+    delta += std::pow(cosOtherLatitude * sinDeltaLongitude, 2);
+    delta = std::sqrt(delta);
+
+    double denom = (sinThisLatitude * sinOtherLatitude) + (cosThisLatitude * cosOtherLatitude * cosDeltaLongitude);
+
+    delta = std::atan2(delta, denom);
+
+    return delta * 6372795.;
+  }
+
+  double GPSLocation::courseTo(const GPSLocation& other) const
+  {
+    // returns course in degrees (North=0, East=90, South=180, West=270)
+    // to other position. Because Earth is no exact sphere, calculated
+    // course may be off by a tiny fraction.
+    // Courtesy of Maarten Lamers
+
+    double delta = (other.longitude_ - this->longitude_) * M_PI / 180.;
+
+    double thisLatitude = this->latitude_ * M_PI / 180.;
+    double otherLatitude = other.latitude_ * M_PI / 180.;
+
+    double a1 = std::sin(delta) * std::cos(otherLatitude);
+    double a2 = std::sin(thisLatitude) * std::cos(otherLatitude) * std::cos(delta);
+
+    a2 = std::cos(thisLatitude) * std::sin(otherLatitude) - a2;
+    a2 = std::atan2(a1, a2);
+
+    if (a2 < 0.) a2 += 2.0 * M_PI;
+
+    return a2 * 180 / M_PI;
   }
 
   GPSDate::GPSDate()

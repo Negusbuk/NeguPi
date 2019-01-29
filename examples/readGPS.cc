@@ -61,7 +61,9 @@ void read_gps(int gpsfd)
 	while (1) {
 		char buffer;
 		while (read(gpsfd, &buffer, 1)==1) {
+
 			if (gps.process(buffer)) {
+
 				if (gps.location().isValid() &&
 				    gps.date().isValid() &&
 				    gps.time().isValid() &&
@@ -76,8 +78,8 @@ void read_gps(int gpsfd)
 					ss << std::setw(2) << gps.satellites().count() << " ";
 					ss << std::showpos;
 					ss << std::setw(10) << std::fixed << std::setprecision(7) << gps.location().latitude() << " ";
-					ss << std::setw(11) << std::fixed << std::setprecision(7) << gps.location().longitude() << " ";
-					ss << std::setw(9) << std::fixed << std::setprecision(1) << gps.altitude().meters() << " ";
+					ss << std::setw(12) << std::fixed << std::setprecision(7) << gps.location().longitude() << " ";
+					ss << std::setw(8) << std::fixed << std::setprecision(1) << gps.altitude().meters() << " ";
 					ss << std::noshowpos;
 					ss << std::setw(4) << gps.date().year() << " ";
 					ss << std::setw(2) << std::setfill('0') << gps.date().month() << " ";
@@ -85,22 +87,6 @@ void read_gps(int gpsfd)
 					ss << std::setw(2) << std::setfill('0') << gps.time().hour() << " ";
 					ss << std::setw(2) << std::setfill('0') << gps.time().minute() << " ";
 					ss << std::setw(4) << std::fixed << std::setprecision(1) << gps.time().second() << " ";
-
-					/*
-					ss << std::setw(2) << gps.satellites.value() << " ";
-					ss << std::showpos;
-					ss << std::setw(11) << std::fixed << std::setprecision(6) << gps.location.lat() << " ";
-					ss << std::setw(10) << std::fixed << std::setprecision(6) << gps.location.lng() << " ";
-					ss << std::setw(9) << std::fixed << std::setprecision(2) << gps.altitude.meters() << " ";
-					ss << std::noshowpos;
-					ss << std::setw(4) << std::setfill('0') << (int)gps.date.year() << " ";
-					ss << std::setw(2) << std::setfill('0') << (int)gps.date.month() << " ";
-					ss << std::setw(2) << std::setfill('0') << (int)gps.date.day() << " ";
-					ss << std::setw(2) << std::setfill('0') << (int)gps.time.hour() << " ";
-					ss << std::setw(2) << std::setfill('0') << (int)gps.time.minute() << " ";
-					ss << std::setw(2) << std::setfill('0') << (int)gps.time.second() << " ";
-					ss << (int)gps.time.centisecond();
-					*/
 
 				    std::lock_guard<std::mutex> guard(mutex);
 

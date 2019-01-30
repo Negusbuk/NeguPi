@@ -750,9 +750,12 @@ namespace NeguPi {
     // MEM_R_W register
     uint8_t readMemoryByte();
     void writeMemoryByte(uint8_t data);
-    void readMemoryBlock(uint8_t *data, uint16_t dataSize, uint8_t bank=0, uint8_t address=0);
-    bool writeMemoryBlock(const uint8_t *data, uint16_t dataSize, uint8_t bank=0, uint8_t address=0, bool verify=true, bool useProgMem=false);
-    bool writeProgMemoryBlock(const uint8_t *data, uint16_t dataSize, uint8_t bank=0, uint8_t address=0, bool verify=true);
+    void readMemoryBlock(uint8_t *data, uint16_t dataSize,
+                         uint8_t bank=0, uint8_t address=0);
+    bool writeMemoryBlock(const uint8_t *data, uint16_t dataSize,
+                          uint8_t bank=0, uint8_t address=0, bool verify=true, bool useProgMem=false);
+    bool writeProgMemoryBlock(const uint8_t *data, uint16_t dataSize,
+                              uint8_t bank=0, uint8_t address=0, bool verify=true);
 
     bool writeDMPConfigurationSet(const uint8_t *data, uint16_t dataSize, bool useProgMem=false);
     bool writeProgDMPConfigurationSet(const uint8_t *data, uint16_t dataSize);
@@ -794,53 +797,67 @@ namespace NeguPi {
     uint8_t dmpSendEIS(uint_fast16_t elements, uint_fast16_t accuracy);
 
     // Get Fixed Point data from FIFO
-    uint8_t dmpGetAccel(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetAccel(int16_t *data, const uint8_t* packet=0);
-    VectorInt16 dmpGetAccel(const uint8_t* packet=0);
-    uint8_t dmpGetQuaternion(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetQuaternion(int16_t *data, const uint8_t* packet=0);
-    Quaternion dmpGetQuaternion(const uint8_t* packet=0);
-    uint8_t dmpGet6AxisQuaternion(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGet6AxisQuaternion(int16_t *data, const uint8_t* packet=0);
-    Quaternion dmpGet6AxisQuaternion(const uint8_t* packet=0);
-    uint8_t dmpGetRelativeQuaternion(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetRelativeQuaternion(int16_t *data, const uint8_t* packet=0);
-    Quaternion dmpGetRelativeQuaternion(const uint8_t* packet=0);
-    uint8_t dmpGetGyro(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetGyro(int16_t *data, const uint8_t* packet=0);
-    VectorInt16 dmpGetGyro(const uint8_t* packet=0);
-    uint8_t dmpSetLinearAccelFilterCoefficient(float coef);
-    uint8_t dmpGetLinearAccel(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetLinearAccel(int16_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetLinearAccel(VectorInt16& v, const uint8_t* packet=0);
-    VectorInt16 dmpGetLinearAccel(const VectorInt16& vRaw, const VectorFloat& gravity);
-    uint8_t dmpGetLinearAccelInWorld(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetLinearAccelInWorld(int16_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetLinearAccelInWorld(VectorInt16& v, const uint8_t* packet=0);
-    VectorInt16 dmpGetLinearAccelInWorld(const VectorInt16& vReal, const Quaternion& q);
-    uint8_t dmpGetGyroAndAccelSensor(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetGyroAndAccelSensor(int16_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetGyroAndAccelSensor(VectorInt16& g, VectorInt16& a, const uint8_t* packet=0);
-    uint8_t dmpGetGyroSensor(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetGyroSensor(int16_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetGyroSensor(VectorInt16& v, const uint8_t* packet=0);
-    uint8_t dmpGetControlData(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetTemperature(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetGravity(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetGravity(int16_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetGravity(VectorInt16& v, const uint8_t* packet=0);
-    VectorFloat dmpGetGravity(const Quaternion& q);
-    uint8_t dmpGetUnquantizedAccel(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetUnquantizedAccel(int16_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetUnquantizedAccel(VectorInt16& v, const uint8_t* packet=0);
-    uint8_t dmpGetQuantizedAccel(int32_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetQuantizedAccel(int16_t *data, const uint8_t* packet=0);
-    uint8_t dmpGetQuantizedAccel(VectorInt16& v, const uint8_t* packet=0);
-    uint8_t dmpGetExternalSensorData(int32_t *data, uint16_t size, const uint8_t* packet=0);
-    uint8_t dmpGetEIS(int32_t *data, const uint8_t* packet=0);
+    VectorInt32 dmpGetAccel32(const uint8_t* packet=0);
+    VectorInt16 dmpGetAccel16(const uint8_t* packet=0);
 
-    VectorFloat dmpGetEuler(const Quaternion& q);
-    VectorFloat dmpGetYawPitchRoll(const Quaternion& q, const VectorFloat& gravity);
+    QuaternionInt32 dmpGetQuaternion32(const uint8_t* packet=0);
+    QuaternionInt16 dmpGetQuaternion16(const uint8_t* packet=0);
+    QuaternionDouble dmpGetQuaternion(const uint8_t* packet=0);
+
+    // uint8_t dmpGet6AxisQuaternion(int32_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGet6AxisQuaternion(int16_t *data, const uint8_t* packet=0);
+    // Quaternion dmpGet6AxisQuaternion(const uint8_t* packet=0);
+    // uint8_t dmpGetRelativeQuaternion(int32_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetRelativeQuaternion(int16_t *data, const uint8_t* packet=0);
+    // Quaternion dmpGetRelativeQuaternion(const uint8_t* packet=0);
+
+    VectorInt32 dmpGetGyro32(const uint8_t* packet=0);
+    VectorInt16 dmpGetGyro16(const uint8_t* packet=0);
+
+    // uint8_t dmpSetLinearAccelFilterCoefficient(float coef);
+
+    // uint8_t dmpGetLinearAccel(int32_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetLinearAccel(int16_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetLinearAccel(VectorInt16& v, const uint8_t* packet=0);
+
+    VectorInt32 dmpGetLinearAccel32(const VectorInt32& vRaw, const VectorDouble& gravity);
+    VectorInt16 dmpGetLinearAccel16(const VectorInt16& vRaw, const VectorDouble& gravity);
+
+    // uint8_t dmpGetLinearAccelInWorld(int32_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetLinearAccelInWorld(int16_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetLinearAccelInWorld(VectorInt16& v, const uint8_t* packet=0);
+
+    template <typename U>
+    VectorInt32 dmpGetLinearAccelInWorld(const VectorInt32& vReal, const Quaternion<U>& q);
+    template <typename U>
+    VectorInt16 dmpGetLinearAccelInWorld(const VectorInt16& vReal, const Quaternion<U>& q);
+
+    // uint8_t dmpGetGyroAndAccelSensor(int32_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetGyroAndAccelSensor(int16_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetGyroAndAccelSensor(VectorInt16& g, VectorInt16& a, const uint8_t* packet=0);
+    // uint8_t dmpGetGyroSensor(int32_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetGyroSensor(int16_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetGyroSensor(VectorInt16& v, const uint8_t* packet=0);
+    // uint8_t dmpGetControlData(int32_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetTemperature(int32_t *data, const uint8_t* packet=0);
+
+    // uint8_t dmpGetGravity(int32_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetGravity(int16_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetGravity(VectorInt16& v, const uint8_t* packet=0);
+
+    VectorDouble dmpGetGravity(const QuaternionDouble& q);
+
+    // uint8_t dmpGetUnquantizedAccel(int32_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetUnquantizedAccel(int16_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetUnquantizedAccel(VectorInt16& v, const uint8_t* packet=0);
+    // uint8_t dmpGetQuantizedAccel(int32_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetQuantizedAccel(int16_t *data, const uint8_t* packet=0);
+    // uint8_t dmpGetQuantizedAccel(VectorInt16& v, const uint8_t* packet=0);
+    // uint8_t dmpGetExternalSensorData(int32_t *data, uint16_t size, const uint8_t* packet=0);
+    // uint8_t dmpGetEIS(int32_t *data, const uint8_t* packet=0);
+
+    VectorDouble dmpGetEuler(const QuaternionDouble& q);
+    VectorDouble dmpGetYawPitchRoll(const QuaternionDouble& q, const VectorDouble& gravity);
 
     // Get Floating Point data from FIFO
     uint8_t dmpGetAccelFloat(float *data, const uint8_t* packet=0);

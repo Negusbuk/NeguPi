@@ -53,10 +53,10 @@ void loop()
     mpu6050.getFIFOBytes(fifoBuffer, packetSize);
 
     // display real acceleration, adjusted to remove gravity
-    NeguPi::Quaternion q = mpu6050.dmpGetQuaternion(fifoBuffer);
-    NeguPi::VectorInt16 aa = mpu6050.dmpGetAccel(fifoBuffer);
-    NeguPi::VectorFloat gravity = mpu6050.dmpGetGravity(q);
-    NeguPi::VectorInt16 aaReal = mpu6050.dmpGetLinearAccel(aa, gravity);
+    NeguPi::QuaternionDouble q = mpu6050.dmpGetQuaternion(fifoBuffer);
+    NeguPi::VectorInt32 aa = mpu6050.dmpGetAccel32(fifoBuffer);
+    NeguPi::VectorDouble gravity = mpu6050.dmpGetGravity(q);
+    NeguPi::VectorInt32 aaReal = mpu6050.dmpGetLinearAccel32(aa, gravity);
 
     printf("areal %6d %6d %6d    ", aaReal.x(), aaReal.y(), aaReal.z());
 

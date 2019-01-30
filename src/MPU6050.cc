@@ -3955,27 +3955,16 @@ namespace NeguPi {
   // uint8_t MPU6050::dmpSendQuantizedAccel(uint_fast16_t elements, uint_fast16_t accuracy);
   // uint8_t MPU6050::dmpSendEIS(uint_fast16_t elements, uint_fast16_t accuracy);
 
-  uint8_t MPU6050::dmpGetAccel(int32_t *data, const uint8_t* packet)
+  VectorInt32 MPU6050::dmpGetAccel32(const uint8_t* packet)
   {
     // TODO: accommodate different arrangements of sent data (ONLY default supported now)
     if (packet == 0) packet = dmpPacketBuffer_;
-    data[0] = ((packet[28] << 24) + (packet[29] << 16) + (packet[30] << 8) + packet[31]);
-    data[1] = ((packet[32] << 24) + (packet[33] << 16) + (packet[34] << 8) + packet[35]);
-    data[2] = ((packet[36] << 24) + (packet[37] << 16) + (packet[38] << 8) + packet[39]);
-    return 0;
+    return VectorInt32(((packet[28] << 24) + (packet[29] << 16) + (packet[30] << 8) + packet[31]),
+                       ((packet[32] << 24) + (packet[33] << 16) + (packet[34] << 8) + packet[35]),
+                       ((packet[36] << 24) + (packet[37] << 16) + (packet[38] << 8) + packet[39]));
   }
 
-  uint8_t MPU6050::dmpGetAccel(int16_t *data, const uint8_t* packet)
-  {
-    // TODO: accommodate different arrangements of sent data (ONLY default supported now)
-    if (packet == 0) packet = dmpPacketBuffer_;
-    data[0] = (packet[28] << 8) + packet[29];
-    data[1] = (packet[32] << 8) + packet[33];
-    data[2] = (packet[36] << 8) + packet[37];
-    return 0;
-  }
-
-  VectorInt16 MPU6050::dmpGetAccel(const uint8_t* packet)
+  VectorInt16 MPU6050::dmpGetAccel16(const uint8_t* packet)
   {
     // TODO: accommodate different arrangements of sent data (ONLY default supported now)
     if (packet == 0) packet = dmpPacketBuffer_;
@@ -3984,66 +3973,68 @@ namespace NeguPi {
                        (packet[36] << 8) + packet[37]);
   }
 
-  uint8_t MPU6050::dmpGetQuaternion(int32_t *data, const uint8_t* packet)
+  QuaternionInt32 MPU6050::dmpGetQuaternion32(const uint8_t* packet)
   {
     // TODO: accommodate different arrangements of sent data (ONLY default supported now)
     if (packet == 0) packet = dmpPacketBuffer_;
-    data[0] = ((packet[0] << 24) + (packet[1] << 16) + (packet[2] << 8) + packet[3]);
-    data[1] = ((packet[4] << 24) + (packet[5] << 16) + (packet[6] << 8) + packet[7]);
-    data[2] = ((packet[8] << 24) + (packet[9] << 16) + (packet[10] << 8) + packet[11]);
-    data[3] = ((packet[12] << 24) + (packet[13] << 16) + (packet[14] << 8) + packet[15]);
-    return 0;
+    return QuaternionInt32(((packet[0] << 24) + (packet[1] << 16) + (packet[2] << 8) + packet[3]),
+                           ((packet[4] << 24) + (packet[5] << 16) + (packet[6] << 8) + packet[7]),
+                           ((packet[8] << 24) + (packet[9] << 16) + (packet[10] << 8) + packet[11]),
+                           ((packet[12] << 24) + (packet[13] << 16) + (packet[14] << 8) + packet[15]));
   }
 
-  uint8_t MPU6050::dmpGetQuaternion(int16_t *data, const uint8_t* packet)
+  QuaternionInt16 MPU6050::dmpGetQuaternion16(const uint8_t* packet)
   {
     // TODO: accommodate different arrangements of sent data (ONLY default supported now)
     if (packet == 0) packet = dmpPacketBuffer_;
-    data[0] = ((packet[0] << 8) + packet[1]);
-    data[1] = ((packet[4] << 8) + packet[5]);
-    data[2] = ((packet[8] << 8) + packet[9]);
-    data[3] = ((packet[12] << 8) + packet[13]);
-    return 0;
+    return QuaternionInt16(((packet[0] << 8) + packet[1]),
+                           ((packet[4] << 8) + packet[5]),
+                           ((packet[8] << 8) + packet[9]),
+                           ((packet[12] << 8) + packet[13]));
   }
 
-  Quaternion MPU6050::dmpGetQuaternion(const uint8_t* packet)
+  QuaternionDouble MPU6050::dmpGetQuaternion(const uint8_t* p)
   {
-    // TODO: accommodate different arrangements of sent data (ONLY default supported now)
-    int16_t qI[4];
-    uint8_t status = dmpGetQuaternion(qI, packet);
-    return Quaternion((float)qI[0] / 16384.0,
-                      (float)qI[1] / 16384.0,
-                      (float)qI[2] / 16384.0,
-                      (float)qI[3] / 16384.0);
+    if (p == 0) p = dmpPacketBuffer_;
+    return QuaternionDouble((double)((p[0] << 24) + (p[1] << 16) + (p[2] << 8) + p[3]) / 16384.,
+                            (double)((p[4] << 24) + (p[5] << 16) + (p[6] << 8) + p[7]) / 16384.,
+                            (double)((p[8] << 24) + (p[9] << 16) + (p[10] << 8) + p[11]) / 16384.,
+                            (double)((p[12] << 24) + (p[13] << 16) + (p[14] << 8) + p[15]) / 16384.);
   }
 
   // uint8_t MPU6050::dmpGet6AxisQuaternion(long *data, const uint8_t* packet);
   // uint8_t MPU6050::dmpGetRelativeQuaternion(long *data, const uint8_t* packet);
 
-  uint8_t MPU6050::dmpGetGyro(int32_t *data, const uint8_t* packet)
+  VectorInt32 MPU6050::dmpGetGyro32(const uint8_t* packet)
   {
     // TODO: accommodate different arrangements of sent data (ONLY default supported now)
     if (packet == 0) packet = dmpPacketBuffer_;
-    data[0] = ((packet[16] << 24) + (packet[17] << 16) + (packet[18] << 8) + packet[19]);
-    data[1] = ((packet[20] << 24) + (packet[21] << 16) + (packet[22] << 8) + packet[23]);
-    data[2] = ((packet[24] << 24) + (packet[25] << 16) + (packet[26] << 8) + packet[27]);
-    return 0;
+    return VectorInt32(((packet[16] << 24) + (packet[17] << 16) + (packet[18] << 8) + packet[19]),
+                       ((packet[20] << 24) + (packet[21] << 16) + (packet[22] << 8) + packet[23]),
+                       ((packet[24] << 24) + (packet[25] << 16) + (packet[26] << 8) + packet[27]));
   }
 
-  uint8_t MPU6050::dmpGetGyro(int16_t *data, const uint8_t* packet)
+  VectorInt16 MPU6050::dmpGetGyro16(const uint8_t* packet)
   {
     // TODO: accommodate different arrangements of sent data (ONLY default supported now)
     if (packet == 0) packet = dmpPacketBuffer_;
-    data[0] = (packet[16] << 8) + packet[17];
-    data[1] = (packet[20] << 8) + packet[21];
-    data[2] = (packet[24] << 8) + packet[25];
-    return 0;
+    return VectorInt16((packet[16] << 8) + packet[17],
+                       (packet[20] << 8) + packet[21],
+                       (packet[24] << 8) + packet[25]);
   }
 
   // uint8_t MPU6050::dmpSetLinearAccelFilterCoefficient(float coef);
   // uint8_t MPU6050::dmpGetLinearAccel(long *data, const uint8_t* packet);
 
-  VectorInt16 MPU6050::dmpGetLinearAccel(const VectorInt16& vRaw, const VectorFloat& gravity)
+  VectorInt32 MPU6050::dmpGetLinearAccel32(const VectorInt32& vRaw, const VectorDouble& gravity)
+  {
+    // get rid of the gravity component (+1g = +4096 in standard DMP FIFO packet)
+    return VectorInt32(vRaw.x() - gravity.x()*4096,
+                       vRaw.y() - gravity.y()*4096,
+                       vRaw.z() - gravity.z()*4096);
+  }
+
+  VectorInt16 MPU6050::dmpGetLinearAccel16(const VectorInt16& vRaw, const VectorDouble& gravity)
   {
     // get rid of the gravity component (+1g = +4096 in standard DMP FIFO packet)
     return VectorInt16(vRaw.x() - gravity.x()*4096,
@@ -4052,7 +4043,17 @@ namespace NeguPi {
   }
 
   // uint8_t MPU6050::dmpGetLinearAccelInWorld(long *data, const uint8_t* packet);
-  VectorInt16 MPU6050::dmpGetLinearAccelInWorld(const VectorInt16& vReal, const Quaternion& q)
+
+  template <typename U>
+  VectorInt32 MPU6050::dmpGetLinearAccelInWorld(const VectorInt32& vReal, const Quaternion<U>& q)
+  {
+    VectorInt32 v(vReal);
+    v.rotate(q);
+    return v;
+  }
+
+  template <typename U>
+  VectorInt16 MPU6050::dmpGetLinearAccelInWorld(const VectorInt16& vReal, const Quaternion<U>& q)
   {
     VectorInt16 v(vReal);
     v.rotate(q);
@@ -4065,11 +4066,11 @@ namespace NeguPi {
   // uint8_t MPU6050::dmpGetTemperature(long *data, const uint8_t* packet);
   // uint8_t MPU6050::dmpGetGravity(long *data, const uint8_t* packet);
 
-  VectorFloat MPU6050::dmpGetGravity(const Quaternion& q)
+  VectorDouble MPU6050::dmpGetGravity(const QuaternionDouble& q)
   {
-    return VectorFloat(2 * (q.x() * q.z() - q.w() * q.y()),
-                       2 * (q.w() * q.x() + q.y() * q.z()),
-                       q.w() * q.w() - q.x() * q.x() - q.y() * q.y() + q.z() * q.z());
+    return VectorDouble(2 * (q.x() * q.z() - q.w() * q.y()),
+                        2 * (q.w() * q.x() + q.y() * q.z()),
+                        q.w() * q.w() - q.x() * q.x() - q.y() * q.y() + q.z() * q.z());
   }
 
   // uint8_t MPU6050::dmpGetUnquantizedAccel(long *data, const uint8_t* packet);
@@ -4077,18 +4078,18 @@ namespace NeguPi {
   // uint8_t MPU6050::dmpGetExternalSensorData(long *data, int size, const uint8_t* packet);
   // uint8_t MPU6050::dmpGetEIS(long *data, const uint8_t* packet);
 
-  VectorFloat MPU6050::dmpGetEuler(const Quaternion& q)
+  VectorDouble MPU6050::dmpGetEuler(const QuaternionDouble& q)
   {
-    return VectorFloat(atan2(2*q.x()*q.y() - 2*q.w()*q.z(), 2*q.w()*q.w() + 2*q.x()*q.x() - 1), // psi
-                       -asin(2*q.x()*q.z() + 2*q.w()*q.y()), // theta
-                       atan2(2*q.y()*q.z() - 2*q.w()*q.x(), 2*q.w()*q.w() + 2*q.z()*q.z() - 1)); // phi
+    return VectorDouble(atan2(2*q.x()*q.y() - 2*q.w()*q.z(), 2*q.w()*q.w() + 2*q.x()*q.x() - 1), // psi
+                        -asin(2*q.x()*q.z() + 2*q.w()*q.y()), // theta
+                        atan2(2*q.y()*q.z() - 2*q.w()*q.x(), 2*q.w()*q.w() + 2*q.z()*q.z() - 1)); // phi
   }
 
-  VectorFloat MPU6050::dmpGetYawPitchRoll(const Quaternion& q, const VectorFloat& g)
+  VectorDouble MPU6050::dmpGetYawPitchRoll(const QuaternionDouble& q, const VectorDouble& g)
   {
-    return VectorFloat(atan2(2*q.x()*q.y() - 2*q.w()*q.z(), 2*q.w()*q.w() + 2*q.x()*q.x() - 1), // yaw: (about Z axis)
-                       atan(g.x() / sqrt(g.y()*g.y() + g.z()*g.z())), // pitch: (nose up/down, about Y axis)
-                       atan(g.y() / sqrt(g.x()*g.x() + g.z()*g.z()))); // roll: (tilt left/right, about X axis)
+    return VectorDouble(atan2(2*q.x()*q.y() - 2*q.w()*q.z(), 2*q.w()*q.w() + 2*q.x()*q.x() - 1), // yaw: (about Z axis)
+                        atan(g.x() / sqrt(g.y()*g.y() + g.z()*g.z())), // pitch: (nose up/down, about Y axis)
+                        atan(g.y() / sqrt(g.x()*g.x() + g.z()*g.z()))); // roll: (tilt left/right, about X axis)
   }
 
   // uint8_t MPU6050::dmpGetAccelFloat(float *data, const uint8_t* packet);

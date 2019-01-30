@@ -35,6 +35,11 @@
 
 namespace NeguPi {
 
+  I2CDevice::I2CDevice()
+  {
+
+  }
+
   I2CDevice::I2CDevice(const std::string& device, uint8_t address)
     : device_(device),
       address_(address),

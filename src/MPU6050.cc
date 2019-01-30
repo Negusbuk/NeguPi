@@ -26,6 +26,12 @@
 
 namespace NeguPi {
 
+  MPU6050::MPU6050()
+  : I2CDevice()
+  {
+
+  }
+
   MPU6050::MPU6050(const std::string& device, unsigned int address)
   : I2CDevice(device, address)
   {

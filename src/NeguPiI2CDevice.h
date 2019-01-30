@@ -29,6 +29,7 @@ namespace NeguPi {
   {
   public:
 
+    I2CDevice();
     I2CDevice(const std::string& device, uint8_t address);
 
     bool open();

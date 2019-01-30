@@ -387,6 +387,7 @@ namespace NeguPi {
   {
   public:
 
+    MPU6050();
     MPU6050(const std::string& device, unsigned int address);
 
     void initialize();

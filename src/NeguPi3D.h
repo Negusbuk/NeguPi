@@ -26,42 +26,42 @@
 
 namespace NeguPi {
 
-  class Quaternion
+  template <typename T> class Quaternion
   {
   public:
 
     Quaternion()
-    : w_(0.), x_(0.), y_(0.), z_(0.) { }
+    : w_(0), x_(0), y_(0), z_(0) { }
 
-    Quaternion(double w, double x, double y, double z)
+    Quaternion(T w, T x, T y, T z)
     : w_(w), x_(x), y_(y), z_(z) { }
 
-    const double w() const { return w_; }
-    double& w() { return w_; }
+    const T w() const { return w_; }
+    T& w() { return w_; }
 
-    const double x() const { return x_; }
-    double& x() { return x_; }
+    const T x() const { return x_; }
+    T& x() { return x_; }
 
-    const double y() const { return y_; }
-    double& y() { return y_; }
+    const T y() const { return y_; }
+    T& y() { return y_; }
 
-    const double z() const { return z_; }
-    double& z() { return z_; }
+    const T z() const { return z_; }
+    T& z() { return z_; }
 
-    Quaternion getProduct(const Quaternion& q) const {
+    Quaternion<T> getProduct(const Quaternion<T>& q) const {
       // Quaternion multiplication is defined by:
       //     (Q1 * Q2).w = (w1w2 - x1x2 - y1y2 - z1z2)
       //     (Q1 * Q2).x = (w1x2 + x1w2 + y1z2 - z1y2)
       //     (Q1 * Q2).y = (w1y2 - x1z2 + y1w2 + z1x2)
       //     (Q1 * Q2).z = (w1z2 + x1y2 - y1x2 + z1w2
-      return Quaternion(w_*q.w() - x_*q.x() - y_*q.y() - z_*q.z(),  // new w
-                        w_*q.x() + x_*q.w() + y_*q.z() - z_*q.y(),  // new x
-                        w_*q.y() - x_*q.z() + y_*q.w() + z_*q.x(),  // new y
-                        w_*q.z() + x_*q.y() - y_*q.x() + z_*q.w()); // new z
+      return Quaternion<T>(w_*q.w() - x_*q.x() - y_*q.y() - z_*q.z(),  // new w
+                           w_*q.x() + x_*q.w() + y_*q.z() - z_*q.y(),  // new x
+                           w_*q.y() - x_*q.z() + y_*q.w() + z_*q.x(),  // new y
+                           w_*q.z() + x_*q.y() - y_*q.x() + z_*q.w()); // new z
     }
 
-    Quaternion getConjugate() const {
-      return Quaternion(w_, -x_, -y_, -z_);
+    Quaternion<T> getConjugate() const {
+      return Quaternion<T>(w_, -x_, -y_, -z_);
     }
 
     double getMagnitude() {
@@ -76,20 +76,23 @@ namespace NeguPi {
       z_ /= m;
     }
 
-    Quaternion getNormalized() {
-      Quaternion r(w_, x_, y_, z_);
+    Quaternion<T> getNormalized() {
+      Quaternion<T> r(w_, x_, y_, z_);
       r.normalize();
       return r;
     }
 
   protected:
 
-    double w_;
-    double x_;
-    double y_;
-    double z_;
-
+    T w_;
+    T x_;
+    T y_;
+    T z_;
   };
+
+  typedef Quaternion<int16_t> QuaternionInt16;
+  typedef Quaternion<int32_t> QuaternionInt32;
+  typedef Quaternion<double> QuaternionDouble;
 
   template <typename T> class Vector3D
   {
@@ -127,7 +130,7 @@ namespace NeguPi {
       return r;
     }
 
-    void rotate(const Quaternion& q) {
+    void rotate(const Quaternion<T>& q) {
       // http://www.cprogramming.com/tutorial/3d/quaternions.html
       // http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/transforms/index.htm
       // http://content.gpwiki.org/index.php/OpenGL:Tutorials:Using_Quaternions_to_represent_rotation
@@ -138,7 +141,7 @@ namespace NeguPi {
       // - q is the orientation quaternion
       // - P_in is the input vector (a*aReal)
       // - conj(q) is the conjugate of the orientation quaternion (q=[w,x,y,z], q*=[w,-x,-y,-z])
-      Quaternion p(0, x_, y_, z_);
+      Quaternion<T> p(0, x_, y_, z_);
 
       // quaternion multiplication: q * p, stored back in p
       p = q.getProduct(p);
@@ -152,7 +155,7 @@ namespace NeguPi {
       z_ = p.z();
     }
 
-    Vector3D<T> getRotated(const Quaternion& q) {
+    Vector3D<T> getRotated(const Quaternion<T>& q) {
       Vector3D<T> r(x_, y_, z_);
       r.rotate(q);
       return r;
@@ -167,7 +170,7 @@ namespace NeguPi {
 
   typedef Vector3D<int16_t> VectorInt16;
   typedef Vector3D<int32_t> VectorInt32;
-  typedef Vector3D<float> VectorFloat;
+  typedef Vector3D<double> VectorDouble;
 };
 
 #endif

@@ -44,4 +44,4 @@ add_executable(statemachine statemachine.cc)
 add_executable(readGPS readGPS.cc)
 target_link_libraries(readGPS ${CMAKE_THREAD_LIBS_INIT})
 
-add_executable(mpu6050_1 mpu6050_1.cc)
+add_executable(mpu6050_raw mpu6050_raw.cc)

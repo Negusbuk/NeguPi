@@ -30,7 +30,17 @@ namespace NeguPi {
   class Log
   {
   public:
-    Log();
+
+    enum LogLevel {
+        Debug       = 0,
+        Spam        = 1,
+        Message     = 2,
+        Warning     = 3,
+        Critical    = 4,
+        Fatal       = 5
+    };
+
+    Log(LogLevel level = Message);
     ~Log();
 
     inline Log &operator<<(char t) { stream_ << t; return *this; }
@@ -48,6 +58,8 @@ namespace NeguPi {
     inline Log &operator<<(const void * t) { stream_ << t; return *this; }
 
   protected:
+
+    LogLevel logLevel_;
     std::stringstream stream_;
     std::string buffer_;
   };
@@ -57,7 +69,7 @@ namespace NeguPi {
   public:
 
     static Logger* instance(bool daemonized = false);
-    void write(const std::string& message);
+    void write(Log::LogLevel level, const std::string& message);
 
   protected:
 

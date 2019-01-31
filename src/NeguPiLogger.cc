@@ -21,19 +21,23 @@
 #include <syslog.h>
 
 #include <iostream>
+#include <sstream>
+#include <chrono>
+#include <iomanip>
 
 #include "NeguPiLogger.h"
 
 namespace NeguPi {
 
-  Log::Log()
+  Log::Log(LogLevel level)
+  : logLevel_(level)
   {
 
   }
 
   Log::~Log()
   {
-    Logger::instance()->write(stream_.str());
+    Logger::instance()->write(logLevel_, stream_.str());
   }
 
   Logger* Logger::instance_ = NULL;
@@ -53,12 +57,36 @@ namespace NeguPi {
     return instance_;
   }
   
-  void Logger::write(const std::string& text)
+  void Logger::write(Log::LogLevel level, const std::string& message)
   {
+    auto now = std::chrono::system_clock::now();
+    auto dur = now.time_since_epoch();
+    dur -= std::chrono::duration_cast<std::chrono::seconds>(dur);
+
+    auto now_c = std::chrono::system_clock::to_time_t(now);
+
+    std::stringstream ssTp;
+
+    ssTp << std::put_time(std::localtime(&now_c), "%Y-%m-%d %H:%M:%S");
+    ssTp << "." << std::setw(3) << std::setfill('0') << static_cast<unsigned>(dur / std::chrono::milliseconds(1));
+    ssTp << std::setfill(' ');
+    ssTp << " ";
+
+    switch (level) {
+    case Log::Debug: ssTp << "D"; break;
+    case Log::Spam: ssTp << "S"; break;
+    case Log::Message: ssTp << "M"; break;
+    case Log::Warning: ssTp << "W"; break;
+    case Log::Critical: ssTp << "C"; break;
+    case Log::Fatal: ssTp << "F"; break;
+    }
+
+    ssTp << " ";
+
     if (!daemonized_) {
-      std::cout << text << std::endl;
+      std::cout << ssTp.str() << std::endl;
     } else {
-      syslog(LOG_NOTICE, "%s", text.c_str());
+      syslog(LOG_NOTICE, "%s", ssTp.str().c_str());
     }
   }
 

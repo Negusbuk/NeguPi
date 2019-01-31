@@ -42,16 +42,18 @@ namespace NeguPi {
 
   Logger* Logger::instance_ = NULL;
 
-  Logger::Logger(bool daemonized)
-  :daemonized_(daemonized)
+  Logger::Logger(Log::LogLevel logLevel, bool daemonized)
+  : logLevel_(logLevel),
+	daemonized_(daemonized)
   {
 
   }
 
-  Logger* Logger::instance(bool daemonized)
+  Logger* Logger::instance(Log::LogLevel logLevel,
+		                   bool daemonized)
   {
     if (instance_==NULL) {
-      instance_ = new Logger(daemonized);
+      instance_ = new Logger(logLevel, daemonized);
     }
 
     return instance_;
@@ -59,6 +61,8 @@ namespace NeguPi {
   
   void Logger::write(Log::LogLevel level, const std::string& message)
   {
+	  if (level < logLevel_) return;
+
     auto now = std::chrono::system_clock::now();
     auto dur = now.time_since_epoch();
     dur -= std::chrono::duration_cast<std::chrono::seconds>(dur);
@@ -82,6 +86,8 @@ namespace NeguPi {
     }
 
     ssTp << " ";
+
+    ssTp << message;
 
     if (!daemonized_) {
       std::cout << ssTp.str() << std::endl;

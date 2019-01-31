@@ -95,7 +95,7 @@ void read_gps(int gpsfd)
 
           std::lock_guard<std::mutex> guard(mutex);
 
-          Log() << ss.str();
+          LogM() << ss.str();
         }
       }
     }
@@ -124,7 +124,7 @@ int configure()
   //	O_NOCTTY - When set and path identifies a terminal device, open() shall not cause the terminal device to become the controlling terminal for the process.
   int gpsfd = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NDELAY); //Open in non blocking read/write mode
   if (gpsfd == -1) {
-    Log() << "Error - Unable to open UART.  Ensure it is not in use by another application";
+    LogM() << "Error - Unable to open UART.  Ensure it is not in use by another application";
     return -1;
   }
 
@@ -164,7 +164,7 @@ int open_UART()
 {
   int gpsfd = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY);		//Open in non blocking read/write mode
   if (gpsfd == -1) {
-    Log() << "Error - Unable to open UART.  Ensure it is not in use by another application";
+    LogS() << "Error - Unable to open UART.  Ensure it is not in use by another application";
   }
 
   //CONFIGURE THE UART
@@ -191,7 +191,7 @@ int open_UART()
 
 int main(int argc, char * argv[])
 {
-  Logger::instance(false);
+  Logger::instance(Log::Message, false);
 
   NeguPi::Millis::instance();
 

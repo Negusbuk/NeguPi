@@ -28,19 +28,6 @@
 
 #include "MPU6050.h"
 
-//#define DEBUG
-#ifdef DEBUG
-    #define DEBUG_PRINT(x) Log() << x
-    #define DEBUG_PRINTF(x, y) Log() << x << " : " << y
-    #define DEBUG_PRINTLN(x) Log() << x
-    #define DEBUG_PRINTLNF(x, y) Log() << x << " : " << y
-#else
-    #define DEBUG_PRINT(x)
-    #define DEBUG_PRINTF(x, y)
-    #define DEBUG_PRINTLN(x)
-    #define DEBUG_PRINTLNF(x, y)
-#endif
-
 #define MPU6050_DMP_CODE_SIZE      1929 // dmpMemory[]
 #define MPU6050_DMP_CONFIG_SIZE     192 // dmpConfig[]
 #define MPU6050_DMP_UPDATES_SIZE     47 // dmpUpdates[]

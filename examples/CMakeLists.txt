@@ -45,5 +45,3 @@ add_executable(readGPS readGPS.cc)
 target_link_libraries(readGPS ${CMAKE_THREAD_LIBS_INIT})
 
 add_executable(mpu6050_raw mpu6050_raw.cc)
-
-add_executable(mpu6050_dmp mpu6050_dmp.cc)

@@ -64,17 +64,61 @@ namespace NeguPi {
     std::string buffer_;
   };
 
+  class LogD : public Log
+  {
+  public:
+    LogD() : Log(Log::Debug) { }
+    ~LogD() {}
+  };
+
+  class LogS : public Log
+  {
+  public:
+    LogS() : Log(Log::Spam) { }
+    ~LogS() {}
+  };
+
+  class LogM : public Log
+  {
+  public:
+    LogM() : Log(Log::Message) { }
+    ~LogM() {}
+  };
+
+  class LogW : public Log
+  {
+  public:
+    LogW() : Log(Log::Warning) { }
+    ~LogW() {}
+  };
+
+  class LogC : public Log
+  {
+  public:
+    LogC() : Log(Log::Critical) { }
+    ~LogC() {}
+  };
+
+  class LogF : public Log
+  {
+  public:
+    LogF() : Log(Log::Fatal) { }
+    ~LogF() {}
+  };
+
   class Logger
   {
   public:
 
-    static Logger* instance(bool daemonized = false);
+    static Logger* instance(Log::LogLevel logLevel = Log::Message,
+    		                bool daemonized = false);
     void write(Log::LogLevel level, const std::string& message);
 
   protected:
 
-    Logger(bool daemonized);
+    Logger(Log::LogLevel level, bool daemonized);
     static Logger* instance_;
+    Log::LogLevel logLevel_;
     bool daemonized_;
   };
   

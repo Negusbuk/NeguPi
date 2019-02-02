@@ -22,6 +22,7 @@
 #define NEGUPILOGGER_H
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 #include <sstream>
 
@@ -56,6 +57,8 @@ namespace NeguPi {
     inline Log &operator<<(const char* t) { stream_ << t; return *this; }
     inline Log &operator<<(const std::string& t) { stream_ << t; return *this; }
     inline Log &operator<<(const void * t) { stream_ << t; return *this; }
+
+    inline Log &operator<<(std::ios_base&(*t)(std::ios_base&)) { (*t)(stream_); return *this; }
 
   protected:
 

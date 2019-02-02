@@ -67,7 +67,7 @@ namespace NeguPi {
    */
   bool MPU6050::testConnection()
   {
-    return getDeviceID() == 0x34;
+    return getDeviceID() == 0x39;
   }
 
   // AUX_VDDIO register (InvenSense demo code calls this RA_*G_OFFS_TC)

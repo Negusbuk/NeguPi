@@ -124,7 +124,7 @@ int configure()
   //	O_NOCTTY - When set and path identifies a terminal device, open() shall not cause the terminal device to become the controlling terminal for the process.
   int gpsfd = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY | O_NDELAY); //Open in non blocking read/write mode
   if (gpsfd == -1) {
-    LogM() << "Error - Unable to open UART.  Ensure it is not in use by another application";
+    LogF() << "Error - Unable to open UART.  Ensure it is not in use by another application";
     return -1;
   }
 
@@ -164,7 +164,7 @@ int open_UART()
 {
   int gpsfd = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY);		//Open in non blocking read/write mode
   if (gpsfd == -1) {
-    LogS() << "Error - Unable to open UART.  Ensure it is not in use by another application";
+    LogF() << "Error - Unable to open UART.  Ensure it is not in use by another application";
   }
 
   //CONFIGURE THE UART

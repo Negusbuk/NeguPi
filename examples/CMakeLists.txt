@@ -47,3 +47,6 @@ target_link_libraries(readGPS ${CMAKE_THREAD_LIBS_INIT})
 add_executable(mpu6050_raw mpu6050_raw.cc)
 
 add_executable(mpu6050_dmp mpu6050_dmp.cc)
+
+add_executable(readMPU6050 readMPU6050.cc)
+target_link_libraries(readMPU6050 ${CMAKE_THREAD_LIBS_INIT})
